@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screen-Only Bug Showcase & Screenshot Studio | Hacktoberfest Track 1</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              850: '#151e2e',
+              950: '#070b14',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- html2canvas for 1-click screenshot exports -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+
+    /* Custom highlight boxes for visual defect callouts */
+    .defect-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Bug B transform stacking trap */
+    .stacking-trap-layer {
+      transform: translate3d(0, 0, 0); /* Creates new local stacking context */
+      will-change: transform;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6 sm:p-10 selection:bg-sky-500 selection:text-white">
+
+  <!-- Header & Instructions -->
+  <header class="max-w-6xl mx-auto mb-8 pb-6 border-b border-slate-800 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="defect-badge bg-sky-950/80 text-sky-300 border border-sky-800">Track 1 Live Test Lab</span>
+        <span class="text-xs font-semibold text-slate-400">GemmaLens Defect Suite</span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">Visual Defect Studio & 1-Click Screenshot Capture</h1>
+      <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+        3 deliberate screen-only rendering flaws that unit tests cannot detect. Click <strong>"📸 Capture Screenshot"</strong> on any component to generate a PNG, then drag it directly into the Gemma 4 triage dashboard.
+      </p>
+    </div>
+
+    <!-- Quick action links -->
+    <div class="flex items-center gap-3 shrink-0">
+      <button onclick="captureElement('full-board', 'all_3_visual_bugs_board.png')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 text-xs font-semibold text-slate-200 transition flex items-center gap-2 shadow-sm">
+        <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        <span>📸 Capture Full Board</span>
+      </button>
+      <a href="/" target="_blank" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-500/20">
+        <span>Open Triage Agent</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Board of 3 Bug Components -->
+  <main id="full-board" class="max-w-6xl mx-auto space-y-10">
+
+    <!-- ========================================================================= -->
+    <!-- BUG A: Un-hyphenated Text Overflow Breaking Container Width               -->
+    <!-- ========================================================================= -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-slate-800 gap-3">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="defect-badge bg-rose-950/80 text-rose-300 border border-rose-800">Bug A &bull; Overflow Anomaly</span>
+            <span class="text-xs text-slate-400 font-mono">Severity: Major</span>
+          </div>
+          <h2 class="text-lg font-bold text-white">Un-hyphenated Long Text Breaking Container Boundary</h2>
+          <p class="text-xs text-slate-400">Card has <code>overflow: visible</code> and lacks <code>overflow-wrap: anywhere</code> or <code>word-break: break-all</code>.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Toggle State Button -->
+          <button onclick="toggleBugA()" id="btn-toggle-a" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-medium text-xs transition">
+            ❌ Mode: Buggy (Overflowing)
+          </button>
+          <!-- Capture Button -->
+          <button onclick="captureElement('container-bug-a', 'bug_a_text_overflow.png')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+            </svg>
+            <span>📸 Capture PNG</span>
+          </button>
+          <button onclick="copyPrompt('A')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition" title="Copy report prompt">
+            📋 Copy Context
+          </button>
+        </div>
+      </div>
+
+      <!-- Component Demo Area -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+        
+        <!-- Live Render Canvas -->
+        <div id="container-bug-a" class="md:col-span-8 bg-slate-950 p-6 rounded-xl border border-slate-800 flex flex-col items-start relative">
+          <div class="text-[11px] font-mono uppercase text-slate-500 mb-3 flex items-center justify-between w-full">
+            <span>Parent Dashboard Column (Max 360px)</span>
+            <span class="text-rose-400 font-bold" id="bug-a-status-label">Layout Broken</span>
+          </div>
+
+          <!-- The Buggy Card -->
+          <div id="card-bug-a" class="w-[340px] bg-slate-900 border-2 border-rose-500/70 rounded-xl p-5 shadow-2xl relative">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Cluster Security Token</h3>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">ACTIVE</span>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-2">Authentication endpoint URL:</p>
+
+            <!-- Text Element that overflows -->
+            <div id="overflowing-text-wrapper" class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <code id="overflowing-text" class="text-xs font-mono text-rose-400 whitespace-nowrap block">
+                https://vault.us-east-1.internal.cloud/api/v2/auth/organizations/org_9918239012847192837192837192837129837192837192837129837128937129837129837192837192837192837129837192837192837129837128937129837/token_stream?session=valid
+              </code>
+            </div>
+
+            <!-- Overlap visual warning line -->
+            <div id="boundary-guide-a" class="mt-3 text-[11px] text-rose-300 flex items-center gap-1 font-sans">
+              <svg class="w-4 h-4 text-rose-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              </svg>
+              <span>String punches completely through right edge of card by +400px!</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Technical Explanation Card -->
+        <div class="md:col-span-4 space-y-3 text-xs">
+          <div class="p-4 rounded-xl bg-slate-850/80 border border-slate-750">
+            <h4 class="font-bold text-slate-200 mb-1">Visual Symptoms</h4>
+            <p class="text-slate-400 leading-relaxed">
+              Without <code>overflow-wrap: anywhere</code> or <code>word-break: break-all</code>, unbroken alphanumeric strings have an intrinsic minimum inline size equal to the entire unbroken word. The element spills out of its parent card, overlapping adjacent UI panels or causing unwanted horizontal scrolls.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-850/80 border border-slate-750 font-mono text-[11px]">
+            <span class="text-sky-300 font-bold block mb-1">Expected Gemma 4 Patch:</span>
+            <code>overflow-wrap: anywhere;</code><br>
+            <code>word-break: break-all;</code><br>
+            <code>max-width: 100%;</code>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- BUG B: Sticky Navigation Trapped Behind Modal by Stacking Context        -->
+    <!-- ========================================================================= -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-slate-800 gap-3">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="defect-badge bg-purple-950/80 text-purple-300 border border-purple-800">Bug B &bull; Stacking Context Trap</span>
+            <span class="text-xs text-slate-400 font-mono">Severity: Critical</span>
+          </div>
+          <h2 class="text-lg font-bold text-white">Sticky Navigation Trapped Under Modal / Z-Index Inversion</h2>
+          <p class="text-xs text-slate-400">Modal uses <code>z-index: 9999</code> but is trapped in a lower stacking context created by <code>transform</code> on an ancestor.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Toggle State Button -->
+          <button onclick="toggleBugB()" id="btn-toggle-b" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-medium text-xs transition">
+            ❌ Mode: Buggy (Stacking Trap)
+          </button>
+          <!-- Capture Button -->
+          <button onclick="captureElement('container-bug-b', 'bug_b_stacking_trap.png')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 font-medium text-xs transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+            </svg>
+            <span>📸 Capture PNG</span>
+          </button>
+          <button onclick="copyPrompt('B')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition" title="Copy report prompt">
+            📋 Copy Context
+          </button>
+        </div>
+      </div>
+
+      <!-- Component Demo Area -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+        
+        <!-- Live Render Canvas -->
+        <div id="container-bug-b" class="md:col-span-8 bg-slate-950 p-6 rounded-xl border border-slate-800 relative h-[360px] overflow-hidden flex flex-col justify-between">
+          
+          <!-- Sticky Navbar with z-index: 50 -->
+          <header class="w-full bg-slate-850/95 border-b border-slate-750 p-3 rounded-lg z-50 flex items-center justify-between shadow-md">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded bg-sky-500 flex items-center justify-center font-bold text-xs text-slate-950">App</div>
+              <span class="text-xs font-bold text-white">Sticky Navigation Bar (<span class="text-sky-400">z-index: 50</span>)</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-400">Home</span>
+              <span class="text-slate-400">Deployments</span>
+              <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">Profile</span>
+            </div>
+          </header>
+
+          <!-- Middle Page Content holding the transformed parent -->
+          <div id="parent-card-b" class="stacking-trap-layer my-auto p-4 rounded-xl bg-slate-900 border border-slate-800 relative">
+            <div class="flex items-center justify-between mb-1">
+              <h4 class="text-xs font-bold text-slate-200">Parent Card with <code>transform: translate3d(0,0,0)</code></h4>
+              <span class="text-[10px] text-amber-400 font-mono">Stacking Context Trap</span>
+            </div>
+            <p class="text-xs text-slate-400">Click below to trigger confirmation modal nested inside this card.</p>
+
+            <!-- Trapped Modal Overlay -->
+            <div id="modal-b" class="absolute -top-16 -left-4 w-[110%] h-[240px] bg-black/85 backdrop-blur-sm border-2 border-rose-500/80 rounded-2xl p-5 shadow-2xl z-[9999] flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between text-rose-400 text-xs font-bold mb-2">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    CRITICAL MODAL (z-index: 9999)
+                  </span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800">CLIPPED BY TOP BAR</span>
+                </div>
+                <h3 class="text-sm font-bold text-white mb-1">Terminate Production Kubernetes Node?</h3>
+                <p class="text-xs text-slate-300">
+                  Notice that even with <code class="text-rose-300">z-index: 9999</code>, this modal appears <strong>BEHIND</strong> the sticky navigation bar above because <code>transform</code> trapped it in a local stacking context!
+                </p>
+              </div>
+
+              <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button class="px-3 py-1 rounded bg-slate-800 text-slate-300 text-xs">Dismiss</button>
+                <button class="px-3 py-1 rounded bg-rose-600 text-white font-bold text-xs">Terminate</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-slate-500 text-center">
+            Footer Status Bar &bull; System Normal
+          </div>
+
+        </div>
+
+        <!-- Technical Explanation Card -->
+        <div class="md:col-span-4 space-y-3 text-xs">
+          <div class="p-4 rounded-xl bg-slate-850/80 border border-slate-750">
+            <h4 class="font-bold text-slate-200 mb-1">Visual Symptoms</h4>
+            <p class="text-slate-400 leading-relaxed">
+              The modal dialog is rendered visually behind the top navigation bar despite having <code>z-index: 9999</code> compared to <code>z-index: 50</code>. CSS properties like <code>transform</code>, <code>filter</code>, and <code>perspective</code> establish a new stacking context that isolates all child z-indices from the root stacking order.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-850/80 border border-slate-750 font-mono text-[11px]">
+            <span class="text-sky-300 font-bold block mb-1">Expected Gemma 4 Patch:</span>
+            <code>Hoist to &lt;body&gt; via React Portal / Native &lt;dialog&gt;</code><br>
+            <code>OR remove transform/filter from ancestor</code>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- BUG C: Flex Child Shrinking into 0-Width Block (Missing min-width: 0)     -->
+    <!-- ========================================================================= -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-slate-800 gap-3">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="defect-badge bg-amber-950/80 text-amber-300 border border-amber-800">Bug C &bull; Flex Collapse</span>
+            <span class="text-xs text-slate-400 font-mono">Severity: Major</span>
+          </div>
+          <h2 class="text-lg font-bold text-white">Flex Child Crushed to 0-Width Inside Nested Flexbox</h2>
+          <p class="text-xs text-slate-400">Missing <code>min-width: 0</code> on middle text container causes adjacent rigid siblings to squeeze it into total illegibility.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Toggle State Button -->
+          <button onclick="toggleBugC()" id="btn-toggle-c" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-medium text-xs transition">
+            ❌ Mode: Buggy (Crushed to 0-width)
+          </button>
+          <!-- Capture Button -->
+          <button onclick="captureElement('container-bug-c', 'bug_c_flex_collapse.png')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+            </svg>
+            <span>📸 Capture PNG</span>
+          </button>
+          <button onclick="copyPrompt('C')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition" title="Copy report prompt">
+            📋 Copy Context
+          </button>
+        </div>
+      </div>
+
+      <!-- Component Demo Area -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+        
+        <!-- Live Render Canvas -->
+        <div id="container-bug-c" class="md:col-span-8 bg-slate-950 p-6 rounded-xl border border-slate-800 flex flex-col items-center">
+          <div class="text-[11px] font-mono uppercase text-slate-500 mb-3 flex items-center justify-between w-full">
+            <span>Narrow Screen Viewport (<span class="text-sky-400">Width: 380px</span>)</span>
+            <span class="text-rose-400 font-bold" id="bug-c-status-label">Text Obliterated</span>
+          </div>
+
+          <!-- Simulated Nested Flex Container -->
+          <div class="w-[380px] bg-slate-900 border-2 border-rose-500/70 rounded-xl p-4 shadow-xl">
+            
+            <!-- Outer Flex Row -->
+            <div class="flex items-center gap-3">
+              
+              <!-- Left Sibling: Non-shrinking Icon -->
+              <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-500/40 text-sky-400 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+
+              <!-- Nested Middle Flex Child that collapses into 0-width or invisible crumb -->
+              <div id="flex-middle-child" class="flex-1 overflow-hidden" style="width: 0px; min-width: 0; max-width: 15px;">
+                <h4 class="text-xs font-bold text-white truncate">Critical Database Failover in Region EU-West-1</h4>
+                <p class="text-[10px] text-slate-400 truncate">Automatic replication initiated at 04:12:00 UTC</p>
+              </div>
+
+              <!-- Right Sibling: Large fixed-width actions and badges taking all available space -->
+              <div class="shrink-0 flex items-center gap-2">
+                <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40 whitespace-nowrap">
+                  CRITICAL P0
+                </span>
+                <button class="px-3 py-1 text-[11px] font-bold rounded-lg bg-slate-800 text-slate-200 border border-slate-700 whitespace-nowrap">
+                  Acknowledge Incident
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Indicator box -->
+            <div id="boundary-guide-c" class="mt-3 p-2 rounded-lg bg-rose-950/40 border border-rose-900 text-[11px] text-rose-300 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-rose-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              </svg>
+              <span>The middle text content is completely invisible (crushed to 15px width)!</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Technical Explanation Card -->
+        <div class="md:col-span-4 space-y-3 text-xs">
+          <div class="p-4 rounded-xl bg-slate-850/80 border border-slate-750">
+            <h4 class="font-bold text-slate-200 mb-1">Visual Symptoms</h4>
+            <p class="text-slate-400 leading-relaxed">
+              When rigid flex children have <code>shrink-0</code> with long text badges and buttons, nested flex items without explicit flex basis or <code>min-width: 0</code> get shrunk to an illegible 0-width block. Critical incident alerts vanish from the screen while DOM test suites report 100% passing tests!
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-850/80 border border-slate-750 font-mono text-[11px]">
+            <span class="text-sky-300 font-bold block mb-1">Expected Gemma 4 Patch:</span>
+            <code>min-width: 140px; flex: 1 1 auto;</code><br>
+            <code>Allow flex-wrap: wrap on small viewports</code>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 px-4 py-3 rounded-xl bg-sky-900/90 border border-sky-500/50 text-white text-xs font-semibold shadow-2xl backdrop-blur-md hidden transition-all duration-300 z-50 flex items-center gap-2">
+    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+    </svg>
+    <span id="toast-message">Notification</span>
+  </div>
+
+  <script>
+    // State management for Bug toggles
+    let isBugA = true;
+    let isBugB = true;
+    let isBugC = true;
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-message');
+      text.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => { toast.classList.add('hidden'); }, 3000);
+    }
+
+    // Toggle Bug A
+    function toggleBugA() {
+      isBugA = !isBugA;
+      const text = document.getElementById('overflowing-text');
+      const btn = document.getElementById('btn-toggle-a');
+      const card = document.getElementById('card-bug-a');
+      const label = document.getElementById('bug-a-status-label');
+      const guide = document.getElementById('boundary-guide-a');
+
+      if (isBugA) {
+        text.className = 'text-xs font-mono text-rose-400 whitespace-nowrap block';
+        btn.className = 'px-3 py-1.5 rounded-lg bg-rose-600 text-white font-medium text-xs transition';
+        btn.textContent = '❌ Mode: Buggy (Overflowing)';
+        card.className = 'w-[340px] bg-slate-900 border-2 border-rose-500/70 rounded-xl p-5 shadow-2xl relative';
+        label.textContent = 'Layout Broken';
+        label.className = 'text-rose-400 font-bold';
+        guide.classList.remove('hidden');
+      } else {
+        text.className = 'text-xs font-mono text-emerald-400 break-all block';
+        btn.className = 'px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium text-xs transition';
+        btn.textContent = '✅ Mode: Fixed (Word-Break)';
+        card.className = 'w-[340px] bg-slate-900 border-2 border-emerald-500/70 rounded-xl p-5 shadow-2xl relative';
+        label.textContent = 'Correctly Wrapped';
+        label.className = 'text-emerald-400 font-bold';
+        guide.classList.add('hidden');
+      }
+    }
+
+    // Toggle Bug B
+    function toggleBugB() {
+      isBugB = !isBugB;
+      const parentCard = document.getElementById('parent-card-b');
+      const btn = document.getElementById('btn-toggle-b');
+      const modal = document.getElementById('modal-b');
+
+      if (isBugB) {
+        parentCard.classList.add('stacking-trap-layer');
+        btn.className = 'px-3 py-1.5 rounded-lg bg-rose-600 text-white font-medium text-xs transition';
+        btn.textContent = '❌ Mode: Buggy (Stacking Trap)';
+        modal.className = 'absolute -top-16 -left-4 w-[110%] h-[240px] bg-black/85 backdrop-blur-sm border-2 border-rose-500/80 rounded-2xl p-5 shadow-2xl z-[9999] flex flex-col justify-between';
+      } else {
+        parentCard.classList.remove('stacking-trap-layer');
+        btn.className = 'px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium text-xs transition';
+        btn.textContent = '✅ Mode: Fixed (Clean Stacking)';
+        modal.className = 'absolute -top-16 -left-4 w-[110%] h-[240px] bg-black/90 backdrop-blur-sm border-2 border-emerald-500/80 rounded-2xl p-5 shadow-2xl z-[9999] flex flex-col justify-between';
+      }
+    }
+
+    // Toggle Bug C
+    function toggleBugC() {
+      isBugC = !isBugC;
+      const child = document.getElementById('flex-middle-child');
+      const btn = document.getElementById('btn-toggle-c');
+      const label = document.getElementById('bug-c-status-label');
+      const guide = document.getElementById('boundary-guide-c');
+
+      if (isBugC) {
+        child.style.width = '0px';
+        child.style.maxWidth = '15px';
+        btn.className = 'px-3 py-1.5 rounded-lg bg-rose-600 text-white font-medium text-xs transition';
+        btn.textContent = '❌ Mode: Buggy (Crushed to 0-width)';
+        label.textContent = 'Text Obliterated';
+        label.className = 'text-rose-400 font-bold';
+        guide.classList.remove('hidden');
+      } else {
+        child.style.width = 'auto';
+        child.style.maxWidth = 'none';
+        btn.className = 'px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium text-xs transition';
+        btn.textContent = '✅ Mode: Fixed (Legible Text)';
+        label.textContent = 'Properly Sized';
+        label.className = 'text-emerald-400 font-bold';
+        guide.classList.add('hidden');
+      }
+    }
+
+    // Capture component screenshot using html2canvas
+    function captureElement(elementId, filename) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      showToast('📸 Rasterizing screenshot...');
+
+      html2canvas(el, {
+        backgroundColor: '#070b14',
+        scale: 2, // High DPI capture
+        useCORS: true,
+        logging: false
+      }).then(canvas => {
+        // Download as file
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast(`✅ Saved ${filename}! Drag it into GemmaLens.`);
+      }).catch(err => {
+        console.error(err);
+        showToast('❌ Screenshot capture failed');
+      });
+    }
+
+    // Copy context prompts for Gemma 4 triage
+    function copyPrompt(bugType) {
+      const prompts = {
+        'A': 'Bug A (Text Overflow): An un-hyphenated long authentication URL token punches through the right boundary of a fixed-width card container because overflow: visible is used without word-break: break-all or overflow-wrap: anywhere.',
+        'B': 'Bug B (Stacking Context Isolation): A confirmation modal with z-index: 9999 renders trapped underneath a sticky header with z-index: 50 because an ancestor container has CSS transform: translate3d(0,0,0) establishing an isolated local stacking context.',
+        'C': 'Bug C (Nested Flexbox 0-Width Collapse): Inside a card row, an alert text title flex item is crushed into an unreadable 0-to-15px sliver because sibling badge and action buttons are rigid while the middle flex item lacks min-width: 0.'
+      };
+
+      navigator.clipboard.writeText(prompts[bugType]).then(() => {
+        showToast(`📋 Copied Context for Bug ${bugType}!`);
+      });
+    }
+  </script>
+</body>
+</html>

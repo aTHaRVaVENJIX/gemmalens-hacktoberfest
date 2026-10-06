@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Case 1: Flexbox Child Overlap Bug</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .buggy-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 p-8 font-sans">
+  <div class="max-w-2xl mx-auto space-y-6">
+    <div class="border-b border-slate-800 pb-4">
+      <div class="text-xs uppercase font-bold text-sky-400">Track 1 Visual Defect Reproduction</div>
+      <h1 class="text-2xl font-bold mt-1">Case 1: Flexbox Collision & Truncation Failure</h1>
+      <p class="text-sm text-slate-400 mt-1">Demonstrates why flex items ignore <code>text-overflow: ellipsis</code> without <code>min-width: 0</code>.</p>
+    </div>
+
+    <!-- Toggle Controls -->
+    <div class="flex items-center space-x-4 bg-slate-900 p-3 rounded-xl border border-slate-800">
+      <span class="text-xs font-semibold text-slate-300">View Mode:</span>
+      <button onclick="setMode('buggy')" id="btn-buggy" class="text-xs px-3 py-1.5 rounded-lg bg-rose-600 text-white font-medium">❌ Buggy (Before)</button>
+      <button onclick="setMode('fixed')" id="btn-fixed" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium">✅ Fixed (After)</button>
+    </div>
+
+    <!-- Demonstration Box -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <div class="text-xs font-semibold text-slate-400 mb-2">Simulated Notification Card (Width: 420px)</div>
+      
+      <!-- Container -->
+      <div id="demo-container" class="w-[420px] bg-slate-850 p-4 rounded-xl border border-slate-750 flex items-center">
+        <!-- Wrapper -->
+        <div id="title-wrapper" class="w-full">
+          <h3 class="buggy-title text-sm font-semibold text-white">
+            High Priority Database Cluster Replication Lag Exceeds 60 Seconds in us-east-1
+          </h3>
+        </div>
+        <span class="ml-3 shrink-0 px-2.5 py-1 text-xs font-bold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
+          P0 CRITICAL
+        </span>
+      </div>
+
+      <div id="explanation-box" class="mt-4 p-3 rounded-xl bg-rose-950/40 border border-rose-900 text-xs text-rose-300">
+        <strong>Visual Bug Active:</strong> Flex item default <code>min-width: auto</code> prevents shrinking below content width. The long title forces the container to burst out or overlaps the badge!
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setMode(mode) {
+      const container = document.getElementById('demo-container');
+      const titleWrapper = document.getElementById('title-wrapper');
+      const explanation = document.getElementById('explanation-box');
+      const btnBuggy = document.getElementById('btn-buggy');
+      const btnFixed = document.getElementById('btn-fixed');
+
+      if (mode === 'buggy') {
+        titleWrapper.className = 'w-full';
+        explanation.className = 'mt-4 p-3 rounded-xl bg-rose-950/40 border border-rose-900 text-xs text-rose-300';
+        explanation.innerHTML = '<strong>Visual Bug Active:</strong> Flex item default <code>min-width: auto</code> prevents shrinking below content width. Notice how ellipsis fails to trigger without <code>min-width: 0</code>!';
+        btnBuggy.className = 'text-xs px-3 py-1.5 rounded-lg bg-rose-600 text-white font-medium';
+        btnFixed.className = 'text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium';
+      } else {
+        titleWrapper.className = 'min-w-0 flex-1';
+        explanation.className = 'mt-4 p-3 rounded-xl bg-emerald-950/40 border border-emerald-900 text-xs text-emerald-300';
+        explanation.innerHTML = '<strong>Gemma 4 Fix Active:</strong> <code>min-width: 0; flex: 1 1 0%;</code> applied. The text now truncates cleanly with <code>...</code> and preserves the badge layout!';
+        btnFixed.className = 'text-xs px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium';
+        btnBuggy.className = 'text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium';
+      }
+    }
+  </script>
+</body>
+</html>

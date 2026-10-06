@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hacktoberfest 2026 | GEMMALENS Visual Defect Triage</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            hf: {
+              forest: '#182522',
+              spruce: '#243633',
+              deepteal: '#2e4742',
+              header: '#3d5f58',
+              ink: '#10201d',
+              cream: '#f7f7f2',
+              creamdark: '#f2f2eb',
+              coral: '#e97b77',
+              coralshadow: '#671912',
+              ochre: '#f5b726',
+              ochreshadow: '#7a5200',
+              sky: '#8bb2de',
+              skyshadow: '#264973',
+              crimson: '#e53927',
+            }
+          },
+          fontFamily: {
+            barlow: ['"Barlow Semi Condensed"', 'system-ui', 'sans-serif'],
+            mono: ['"Martian Mono"', '"JetBrains Mono"', 'ui-monospace', 'monospace'],
+            sans: ['"Inter"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Marked.js for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Highlight.js for code blocks -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+
+  <!-- Official Hacktoberfest Google Fonts: Barlow Semi Condensed, Inter, Martian Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800&family=Inter:wght@400;500;600;700&family=Martian+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --hf-forest: #182522;
+      --hf-spruce: #243633;
+      --hf-header: #3d5f58;
+      --hf-deepteal: #2e4742;
+      --hf-ink: #10201d;
+      --hf-cream: #f7f7f2;
+      --hf-creamdark: #f2f2eb;
+      --hf-coral: #e97b77;
+      --hf-coralshadow: #671912;
+      --hf-ochre: #f5b726;
+      --hf-ochreshadow: #7a5200;
+      --hf-sky: #8bb2de;
+      --hf-crimson: #e53927;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      background: var(--hf-forest);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      background-color: var(--hf-forest);
+      color: var(--hf-cream);
+      line-height: 1.55;
+      position: relative;
+      overflow-x: hidden;
+      cursor: none; /* Handled by custom cursor */
+    }
+
+    /* All clickable elements should hide default cursor */
+    a, button, input, textarea, select, label, .cursor-pointer {
+      cursor: none !important;
+    }
+
+    /* Subtle Hacktoberfest halftone dot matrix */
+    body::after {
+      position: fixed;
+      z-index: 999;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(247, 247, 242, 0.12) 0 0.5px, transparent 0.7px),
+                        radial-gradient(circle, rgba(16, 32, 29, 0.25) 0 0.4px, transparent 0.6px);
+      background-position: 0 0, 4px 5px;
+      background-size: 8px 8px, 12px 12px;
+      content: '';
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    /* Custom Selection */
+    ::selection {
+      color: #10201d;
+      background: #e97b77;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #182522; }
+    ::-webkit-scrollbar-thumb { background: #3d5f58; border: 2px solid #10201d; }
+    ::-webkit-scrollbar-thumb:hover { background: #e97b77; }
+
+    /* ─── Hacktoberfest Hard Shadow Buttons ─── */
+    .hf-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border: 2px solid #10201d;
+      font-family: 'Martian Mono', ui-monospace, monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      padding: 10px 18px;
+      box-shadow: 4px 4px 0 #10201d;
+      transition: transform 120ms cubic-bezier(0, 0, 0.2, 1), box-shadow 120ms cubic-bezier(0, 0, 0.2, 1);
+      user-select: none;
+    }
+    .hf-btn:hover:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 #10201d;
+    }
+    .hf-btn:active:not(:disabled) {
+      transform: translate(4px, 4px);
+      box-shadow: 0 0 0 #10201d;
+    }
+    .hf-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed !important;
+      box-shadow: 2px 2px 0 #10201d;
+      transform: translate(2px, 2px);
+    }
+
+    .hf-btn-coral {
+      background: #e97b77;
+      color: #10201d;
+      box-shadow: 4px 4px 0 #671912;
+    }
+    .hf-btn-coral:hover:not(:disabled) {
+      box-shadow: 2px 2px 0 #671912;
+    }
+
+    .hf-btn-ochre {
+      background: #f5b726;
+      color: #10201d;
+      box-shadow: 4px 4px 0 #7a5200;
+    }
+    .hf-btn-ochre:hover:not(:disabled) {
+      box-shadow: 2px 2px 0 #7a5200;
+    }
+
+    .hf-btn-sky {
+      background: #8bb2de;
+      color: #10201d;
+      box-shadow: 4px 4px 0 #264973;
+    }
+    .hf-btn-sky:hover:not(:disabled) {
+      box-shadow: 2px 2px 0 #264973;
+    }
+
+    .hf-btn-cream {
+      background: #f7f7f2;
+      color: #10201d;
+    }
+
+    /* ─── Hacktoberfest Hard Shadow Card Panels ─── */
+    .hf-panel {
+      border: 2px solid #10201d;
+      background: #243633;
+      box-shadow: 6px 6px 0 #10201d;
+      transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    .hf-panel-cream {
+      border: 2px solid #10201d;
+      background: #f7f7f2;
+      color: #10201d;
+      box-shadow: 6px 6px 0 #10201d;
+    }
+
+    /* ─── Quick Test Tabs ─── */
+    .hf-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 10px 14px;
+      border: 2px solid #10201d;
+      background: #2e4742;
+      color: #f7f7f2;
+      font-family: 'Martian Mono', monospace;
+      box-shadow: 3px 3px 0 #10201d;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease, color 120ms ease;
+    }
+    .hf-tab:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 #10201d;
+      background: #e97b77;
+      color: #10201d;
+    }
+    .hf-tab.active {
+      background: #f5b726;
+      color: #10201d;
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 #10201d;
+    }
+
+    /* ─── Dropzone ─── */
+    #drop-zone {
+      border: 2px dashed #3d5f58;
+      background: #182522;
+      transition: all 150ms ease;
+    }
+    #drop-zone:hover, #drop-zone.drag-over {
+      border-color: #e97b77;
+      background: #243633;
+      box-shadow: 4px 4px 0 #10201d;
+    }
+
+    /* ─── Scanline Effect ─── */
+    @keyframes scanline {
+      0% { top: 0%; opacity: 0.9; }
+      100% { top: 100%; opacity: 0.9; }
+    }
+    .scanline-effect {
+      position: absolute;
+      left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, transparent, #e97b77, transparent);
+      box-shadow: 0 0 16px #e97b77;
+      animation: scanline 1.6s linear infinite;
+    }
+
+    /* ─── Markdown Report Prose ─── */
+    .prose-report h1 {
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: #10201d;
+      border-bottom: 2px solid #10201d;
+      padding-bottom: 0.4rem;
+      margin: 1.4rem 0 0.8rem;
+    }
+    .prose-report h2 {
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #671912;
+      margin: 1.25rem 0 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .prose-report h3 {
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #243633;
+      margin: 0.9rem 0 0.4rem;
+    }
+    .prose-report p, .prose-report li {
+      font-family: 'Inter', sans-serif;
+      color: #243633;
+      line-height: 1.65;
+      font-size: 0.9rem;
+    }
+    .prose-report ul { list-style: disc; margin-left: 1.3rem; margin-bottom: 0.75rem; }
+    .prose-report ol { list-style: decimal; margin-left: 1.3rem; margin-bottom: 0.75rem; }
+    .prose-report strong { color: #10201d; font-weight: 700; }
+    .prose-report code {
+      font-family: 'Martian Mono', monospace;
+      font-size: 0.82rem;
+      color: #671912;
+      background: #f2f2eb;
+      border: 1px solid #10201d;
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+    .prose-report pre {
+      background: #182522 !important;
+      border: 2px solid #10201d;
+      box-shadow: 4px 4px 0 #10201d;
+      padding: 1rem;
+      margin: 0.9rem 0;
+      overflow-x: auto;
+    }
+    .prose-report pre code {
+      color: #f7f7f2 !important;
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+    .prose-report blockquote {
+      border-left: 4px solid #e97b77;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #3d5f58;
+      background: #f2f2eb;
+      border-top: 1px solid #10201d;
+      border-bottom: 1px solid #10201d;
+      border-right: 1px solid #10201d;
+    }
+
+    /* ─── Buggy (Red) vs Fixed (Green) Code Block Highlights ─── */
+    .code-buggy-card {
+      border: 3px solid #e53927 !important;
+      background: #1c0e0e !important;
+      box-shadow: 5px 5px 0 #671912 !important;
+      margin-top: 0.25rem !important;
+      margin-bottom: 1.25rem !important;
+    }
+    .code-buggy-card code {
+      color: #fca5a5 !important;
+    }
+    .code-buggy-header {
+      background: #e53927;
+      color: #ffffff;
+      font-family: 'Martian Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid #10201d;
+      margin-top: 0.75rem;
+      margin-bottom: 0px;
+      box-shadow: 2px 2px 0 #10201d;
+    }
+
+    .code-fixed-card {
+      border: 3px solid #22c55e !important;
+      background: #091a11 !important;
+      box-shadow: 5px 5px 0 #14532d !important;
+      margin-top: 0.25rem !important;
+      margin-bottom: 1.25rem !important;
+    }
+    .code-fixed-card code {
+      color: #86efac !important;
+    }
+    .code-fixed-header {
+      background: #22c55e;
+      color: #052e16;
+      font-family: 'Martian Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid #10201d;
+      margin-top: 0.75rem;
+      margin-bottom: 0px;
+      box-shadow: 2px 2px 0 #10201d;
+    }
+
+    /* Diff lines inside code blocks */
+    .diff-del-line, .hljs-deletion {
+      background: rgba(229, 57, 39, 0.3) !important;
+      color: #fca5a5 !important;
+      border-left: 4px solid #e53927 !important;
+      display: block;
+      padding: 2px 8px;
+      margin: 1px -1rem;
+      font-weight: 600;
+    }
+    .diff-add-line, .hljs-addition {
+      background: rgba(34, 197, 94, 0.3) !important;
+      color: #86efac !important;
+      border-left: 4px solid #22c55e !important;
+      display: block;
+      padding: 2px 8px;
+      margin: 1px -1rem;
+      font-weight: 600;
+    }
+
+    /* ─── Hacktoberfest Custom Interactive Cursor ─── */
+    #cursor-dot {
+      position: fixed;
+      top: 0; left: 0;
+      width: 10px; height: 10px;
+      background-color: #e97b77;
+      border: 1.5px solid #10201d;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      transition: background-color 150ms ease, transform 100ms ease;
+    }
+
+    #cursor-ring {
+      position: fixed;
+      top: 0; left: 0;
+      width: 38px; height: 38px;
+      border: 2px solid #f5b726;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 180ms ease, height 180ms ease, border-color 180ms ease, background-color 180ms ease;
+    }
+
+    body.cursor-hover #cursor-dot {
+      background-color: #f5b726;
+      transform: translate(-50%, -50%) scale(1.4);
+    }
+    body.cursor-hover #cursor-ring {
+      width: 52px; height: 52px;
+      border-color: #e97b77;
+      background-color: rgba(233, 123, 119, 0.15);
+    }
+    body.cursor-active #cursor-ring {
+      width: 28px; height: 28px;
+      background-color: rgba(245, 183, 38, 0.35);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen antialiased flex flex-col">
+
+  <!-- Interactive Cursor Elements -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- HACKTOBERFEST HEADER                        -->
+  <!-- ═══════════════════════════════════════════ -->
+  <header class="sticky top-0 z-50 bg-[#3d5f58] border-b-2 border-[#10201d]">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-8 min-h-[72px] flex items-center justify-between gap-4">
+
+      <!-- Hacktoberfest Style Logo & Brand -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <!-- Badge icon -->
+        <a href="/" class="flex items-center gap-3 text-inherit no-underline group">
+          <div class="w-10 h-10 border-2 border-[#10201d] bg-[#e97b77] flex items-center justify-center shadow-[3px_3px_0_#10201d] transition-transform group-hover:translate-x-0.5 group-hover:translate-y-0.5">
+            <svg class="w-6 h-6 text-[#10201d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="font-barlow font-black text-2xl tracking-tight text-[#f7f7f2] leading-none uppercase">
+              GEMMALENS <span class="text-[#e97b77] italic">26</span>
+            </div>
+            <div class="font-mono text-[10px] text-[#8bb2de] uppercase tracking-wider mt-0.5 font-bold">
+              Track 1 &bull; Visual Defect Triage
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Navigation & Status Pills -->
+      <div class="flex items-center gap-3">
+        <!-- Model Pill -->
+        <span class="hidden md:inline-flex items-center gap-1.5 px-3 py-1 bg-[#2e4742] border-2 border-[#10201d] font-mono text-xs font-bold text-[#f7f7f2] shadow-[2px_2px_0_#10201d]">
+          <span class="w-2 h-2 rounded-full bg-[#f5b726]"></span>
+          <span>GEMMA-4-31B</span>
+        </span>
+
+        <!-- Backend Health Pill -->
+        <div id="backend-status-badge" class="flex items-center gap-2 px-3 py-1 border-2 border-[#10201d] font-mono text-xs font-bold bg-[#243633] text-[#f7f7f2] shadow-[2px_2px_0_#10201d]">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="backend-status-text">CONNECTING...</span>
+        </div>
+
+        <!-- Judge Suite Button (Hard shadow button) -->
+        <button onclick="toggleJudgeModal(true)" class="hf-btn hf-btn-ochre text-xs py-2 px-3.5">
+          ★ JUDGE SUITE
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- MAIN WORKSPACE                              -->
+  <!-- ═══════════════════════════════════════════ -->
+  <main class="max-w-[1440px] mx-auto px-4 sm:px-8 py-8 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-7">
+
+    <!-- ─────────────────────────────────────────── -->
+    <!-- LEFT PANEL: CONTROLS & UPLOAD (5 COLS)      -->
+    <!-- ─────────────────────────────────────────── -->
+    <div class="lg:col-span-5 flex flex-col gap-6">
+
+      <!-- Quick Test Cases (Hard Shadow Panel) -->
+      <section class="hf-panel p-5">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b-2 border-[#10201d]">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 bg-[#e97b77] border border-[#10201d] shadow-[1px_1px_0_#10201d]"></span>
+            <h2 class="font-barlow font-black text-lg tracking-tight uppercase text-[#f7f7f2]">
+              Judge Quick Test Cases
+            </h2>
+          </div>
+          <span class="font-mono text-[10px] text-[#8bb2de] uppercase font-bold tracking-wider">Instant Canvas</span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2.5">
+          <button onclick="loadSampleCase(0)" id="tab-0" class="hf-tab">
+            <span class="text-xs font-black text-[#e97b77]">// 01</span>
+            <span class="text-[11px] font-bold mt-0.5 leading-tight">FLEX COLLISION</span>
+          </button>
+          <button onclick="loadSampleCase(1)" id="tab-1" class="hf-tab">
+            <span class="text-xs font-black text-[#e97b77]">// 02</span>
+            <span class="text-[11px] font-bold mt-0.5 leading-tight">Z-INDEX CLIPPING</span>
+          </button>
+          <button onclick="loadSampleCase(2)" id="tab-2" class="hf-tab">
+            <span class="text-xs font-black text-[#e97b77]">// 03</span>
+            <span class="text-[11px] font-bold mt-0.5 leading-tight">100VW BLOWOUT</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Upload & Triage Config Panel -->
+      <section class="hf-panel p-6 flex flex-col gap-5">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-3 border-b-2 border-[#10201d]">
+          <h2 class="font-barlow font-black text-xl uppercase tracking-tight text-[#f7f7f2]">
+            Screen Defect Capture
+          </h2>
+          <span class="font-mono text-[10px] px-2 py-0.5 bg-[#182522] border border-[#10201d] text-[#8bb2de]">
+            PNG / JPEG / WEBP
+          </span>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div id="drop-zone" class="relative group p-6 text-center cursor-pointer border-2">
+          <input type="file" id="file-input" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+
+          <!-- Empty State -->
+          <div id="upload-prompt" class="flex flex-col items-center justify-center py-4">
+            <div class="w-14 h-14 bg-[#2e4742] border-2 border-[#10201d] flex items-center justify-center shadow-[3px_3px_0_#10201d] mb-3 text-[#e97b77] transition-transform group-hover:scale-105">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <p class="font-barlow font-black text-lg uppercase tracking-tight text-[#f7f7f2]">
+              Drop Screenshot Here Or <span class="text-[#e97b77] underline decoration-2">Browse</span>
+            </p>
+            <p class="font-mono text-xs text-[#8bb2de] mt-1">
+              Supports full page &amp; mobile captures (Max 20MB)
+            </p>
+          </div>
+
+          <!-- Preview State -->
+          <div id="preview-container" class="hidden relative border-2 border-[#10201d] bg-[#10201d] overflow-hidden">
+            <img id="image-preview" src="" alt="Defect preview" class="w-full max-h-64 object-contain mx-auto">
+            <!-- Animated scanline -->
+            <div id="scanline" class="hidden scanline-effect"></div>
+
+            <div class="absolute top-2 left-2 right-2 flex items-center justify-between z-20">
+              <span id="preview-meta" class="font-mono text-[10px] px-2 py-0.5 bg-[#182522] text-[#f7f7f2] border border-[#10201d]"></span>
+              <button type="button" id="remove-btn" class="hf-btn hf-btn-coral text-[10px] py-1 px-2.5">
+                ✕ REMOVE
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Model & Preset Selectors -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-mono text-[11px] font-bold uppercase tracking-wider text-[#f7f7f2] mb-1.5">
+              Gemma 4 Model
+            </label>
+            <select id="model-select" class="w-full bg-[#182522] text-[#f7f7f2] font-mono text-xs p-2.5 border-2 border-[#10201d] shadow-[3px_3px_0_#10201d] focus:outline-none">
+              <option value="gemini-3.5-flash-lite" selected>⚡ Flash-Lite (Fastest: ~4–5s)</option>
+              <option value="gemini-3.5-flash">⚡ Flash-3.5 (Balanced: ~7–8s)</option>
+              <option value="gemma-4-26b-a4b-it">Gemma 4 MoE (26B/4B: ~9s)</option>
+              <option value="gemma-4-31b-it">Gemma 4 Dense (31B: ~35s)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-mono text-[11px] font-bold uppercase tracking-wider text-[#f7f7f2] mb-1.5">
+              QA System Engine
+            </label>
+            <div class="w-full bg-[#182522] text-[#e97b77] font-mono text-xs p-2.5 border-2 border-[#10201d] shadow-[3px_3px_0_#10201d] flex items-center justify-between">
+              <span class="font-bold">RIGOROUS CSS QA</span>
+              <span class="text-[10px] text-[#8bb2de]">temp: 0.2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issue Description Textarea -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block font-mono text-[11px] font-bold uppercase tracking-wider text-[#f7f7f2]">
+              Defect Description &bull; User Notes
+            </label>
+            <span id="char-count" class="font-mono text-[10px] text-[#8bb2de]">0 / 1000</span>
+          </div>
+          <textarea id="issue-description" rows="3" maxlength="1000"
+            placeholder="e.g. Card text collides with action badge on narrow viewports; text-overflow ellipsis does not apply."
+            class="w-full bg-[#182522] text-[#f7f7f2] font-mono text-xs p-3 border-2 border-[#10201d] shadow-[3px_3px_0_#10201d] focus:outline-none placeholder:text-[#52635f] resize-none"></textarea>
+        </div>
+
+        <!-- Action Button (Prominent Hard Shadow Coral Button) -->
+        <button id="triage-btn" disabled class="hf-btn hf-btn-coral w-full py-4 text-base shadow-[5px_5px_0_#671912]">
+          <svg id="btn-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          <span id="btn-text">EXECUTE VISUAL TRIAGE</span>
+        </button>
+
+      </section>
+
+    </div>
+
+
+    <!-- ─────────────────────────────────────────── -->
+    <!-- RIGHT PANEL: TRIAGE REPORT OUTPUT (7 COLS)  -->
+    <!-- ─────────────────────────────────────────── -->
+    <div class="lg:col-span-7 flex flex-col">
+      <div class="hf-panel-cream flex-1 flex flex-col min-h-[580px] overflow-hidden">
+
+        <!-- Report Header Bar -->
+        <div class="px-6 py-4 border-b-2 border-[#10201d] bg-[#f2f2eb] flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-3.5 h-3.5 bg-[#e53927] border border-[#10201d] shadow-[1px_1px_0_#10201d]"></div>
+            <div>
+              <h2 class="font-barlow font-black text-xl tracking-tight uppercase text-[#10201d]">
+                Visual Defect Triage Report
+              </h2>
+              <p class="font-mono text-[10px] text-[#52635f] uppercase tracking-wider">
+                Gemma 4 Multimodal Spatial Layout &bull; Automated CSS Patch
+              </p>
+            </div>
+          </div>
+
+          <div id="report-actions" class="hidden items-center gap-2">
+            <span id="latency-badge" class="font-mono text-xs font-bold px-2.5 py-1 bg-[#182522] text-emerald-400 border-2 border-[#10201d] shadow-[2px_2px_0_#10201d]">
+              ⚡ 4.8s
+            </span>
+            <button onclick="copyReport()" class="hf-btn hf-btn-sky text-xs py-1.5 px-3">
+              <span id="copy-btn-text">COPY .MD</span>
+            </button>
+            <button onclick="downloadReport()" class="hf-btn hf-btn-ochre text-xs py-1.5 px-3">
+              DOWNLOAD
+            </button>
+          </div>
+        </div>
+
+        <!-- Report Content Viewport -->
+        <div id="report-viewport" class="p-6 sm:p-8 flex-1 overflow-y-auto max-h-[780px] relative">
+
+          <!-- State: Empty -->
+          <div id="state-empty" class="h-full min-h-[420px] flex flex-col items-center justify-center text-center p-6">
+            <div class="w-16 h-16 bg-[#e97b77] border-2 border-[#10201d] flex items-center justify-center shadow-[4px_4px_0_#10201d] mb-4">
+              <svg class="w-8 h-8 text-[#10201d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <h3 class="font-barlow font-black text-2xl uppercase tracking-tight text-[#10201d] mb-1">
+              Awaiting Screen Defect Input
+            </h3>
+            <p class="font-sans text-sm text-[#34433f] max-w-md leading-relaxed">
+              Upload a defect screenshot or select one of the Quick Test Cases above, then trigger Gemma 4 to analyze spatial collisions and synthesize copy-pasteable CSS patches.
+            </p>
+          </div>
+
+          <!-- State: Loading -->
+          <div id="state-loading" class="hidden h-full min-h-[420px] flex flex-col items-center justify-center text-center p-6 gap-4">
+            <div class="relative w-16 h-16">
+              <div class="w-16 h-16 border-4 border-[#10201d] bg-[#f5b726] shadow-[4px_4px_0_#10201d] animate-bounce flex items-center justify-center">
+                <svg class="w-8 h-8 text-[#10201d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+            </div>
+            <div>
+              <div id="loading-stage" class="font-barlow font-black text-2xl uppercase text-[#10201d]">
+                Inspecting Rendered Pixels...
+              </div>
+              <p class="font-mono text-xs text-[#52635f] mt-1">
+                Gemma 4 spatial vision computing DOM layout bounding boxes
+              </p>
+            </div>
+            <div class="flex gap-2 mt-2">
+              <span class="w-3 h-3 bg-[#e97b77] border border-[#10201d]"></span>
+              <span class="w-3 h-3 bg-[#f5b726] border border-[#10201d]"></span>
+              <span class="w-3 h-3 bg-[#8bb2de] border border-[#10201d]"></span>
+            </div>
+          </div>
+
+          <!-- State: Rendered Report -->
+          <div id="state-report" class="hidden prose-report">
+            <div id="markdown-output"></div>
+          </div>
+
+          <!-- State: Error -->
+          <div id="state-error" class="hidden h-full min-h-[420px] flex flex-col items-center justify-center text-center p-6 gap-3">
+            <div class="w-14 h-14 bg-[#e53927] border-2 border-[#10201d] shadow-[4px_4px_0_#10201d] flex items-center justify-center text-[#f7f7f2]">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+            <h3 class="font-barlow font-black text-2xl uppercase text-[#e53927]">
+              Triage Inference Failed
+            </h3>
+            <pre id="error-message-text" class="font-mono text-xs text-left p-4 bg-[#182522] text-[#e97b77] border-2 border-[#10201d] max-w-lg w-full overflow-x-auto shadow-[4px_4px_0_#10201d]"></pre>
+            <button onclick="retryTriage()" class="hf-btn hf-btn-coral mt-2">
+              TRY AGAIN
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- JUDGE EVALUATION MODAL (HACKTOBERFEST POPUP)-->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="judge-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-[#10201d]/85 backdrop-blur-sm">
+    <div class="bg-[#f7f7f2] border-4 border-[#10201d] max-w-3xl w-full max-h-[88vh] flex flex-col shadow-[10px_10px_0_#10201d] overflow-hidden">
+      
+      <!-- Modal Accent Top Stripe -->
+      <div class="h-2 w-full bg-[#e97b77]"></div>
+
+      <!-- Modal Header -->
+      <div class="p-5 border-b-2 border-[#10201d] bg-[#f2f2eb] flex items-center justify-between">
+        <div>
+          <div class="font-mono text-xs font-bold uppercase text-[#e53927] tracking-wider">
+            Hacktoberfest Track 1 Evaluation Suite
+          </div>
+          <h2 class="font-barlow font-black text-2xl uppercase tracking-tight text-[#10201d] mt-0.5">
+            The 3 Screen-Only Visual Test Cases
+          </h2>
+        </div>
+        <button onclick="toggleJudgeModal(false)" class="hf-btn hf-btn-coral text-xs py-1.5 px-3">
+          ✕ CLOSE
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-6 text-[#10201d]">
+
+        <!-- Why Unit Tests Fail -->
+        <div class="p-4 border-2 border-[#10201d] bg-[#e97b77]/20 shadow-[3px_3px_0_#10201d]">
+          <h3 class="font-barlow font-black text-lg uppercase text-[#671912] mb-1">
+            Why Unit Tests Fail To Catch Screen-Only Bugs
+          </h3>
+          <p class="font-sans text-xs text-[#243633] leading-relaxed">
+            Unit test runners (Jest, Vitest, Cypress component assertions) check DOM node existence and mock attributes, but do NOT compute rasterized GPU stacking contexts, subpixel font engine wrapping, or scrollbar metrics. Gemma 4 inspects the actual screen pixels to diagnose layout collisions.
+          </p>
+        </div>
+
+        <!-- Case 1 -->
+        <div class="border-2 border-[#10201d] p-4 bg-white shadow-[4px_4px_0_#10201d]">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-barlow font-black text-lg uppercase text-[#10201d]">
+              Case 01: Flexbox Child Collision &amp; Truncation
+            </span>
+            <span class="font-mono text-[10px] font-bold px-2 py-0.5 bg-[#8bb2de] border border-[#10201d] text-[#10201d]">
+              FLEXBOX
+            </span>
+          </div>
+          <p class="font-sans text-xs text-[#34433f] mb-3">
+            <strong>The Bug:</strong> Default flex item <code class="text-[#671912] font-mono">min-width: auto</code> prevents text from shrinking or truncating with an ellipsis, causing the title to overlap or shove sibling badges off-canvas.
+          </p>
+          <div class="grid grid-cols-2 gap-3 font-mono text-[11px]">
+            <div class="p-2.5 bg-[#f2f2eb] border-2 border-[#10201d]">
+              <span class="text-[#e53927] font-bold block mb-1">❌ BUGGY (Screen Collision)</span>
+              <code>.title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }</code>
+            </div>
+            <div class="p-2.5 bg-[#243633] text-[#f7f7f2] border-2 border-[#10201d]">
+              <span class="text-[#f5b726] font-bold block mb-1">✅ GEMMA 4 PATCH</span>
+              <code>.title-wrap { min-width: 0; flex: 1 1 0%; }</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- Case 2 -->
+        <div class="border-2 border-[#10201d] p-4 bg-white shadow-[4px_4px_0_#10201d]">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-barlow font-black text-lg uppercase text-[#10201d]">
+              Case 02: Modal Z-Index Stacking Context Isolation
+            </span>
+            <span class="font-mono text-[10px] font-bold px-2 py-0.5 bg-[#f5b726] border border-[#10201d] text-[#10201d]">
+              STACKING CONTEXT
+            </span>
+          </div>
+          <p class="font-sans text-xs text-[#34433f] mb-3">
+            <strong>The Bug:</strong> A modal with <code class="text-[#671912] font-mono">z-index: 9999</code> renders underneath a sidebar with <code class="text-[#671912] font-mono">z-index: 10</code> because an ancestor container has CSS <code class="text-[#671912] font-mono">transform</code>, trapping the modal in a local stacking context.
+          </p>
+          <div class="grid grid-cols-2 gap-3 font-mono text-[11px]">
+            <div class="p-2.5 bg-[#f2f2eb] border-2 border-[#10201d]">
+              <span class="text-[#e53927] font-bold block mb-1">❌ BUGGY (Stacking Trap)</span>
+              <code>.card { transform: translate3d(0,0,0); }</code>
+            </div>
+            <div class="p-2.5 bg-[#243633] text-[#f7f7f2] border-2 border-[#10201d]">
+              <span class="text-[#f5b726] font-bold block mb-1">✅ GEMMA 4 PATCH</span>
+              <code>Portal to document.body or native &lt;dialog&gt;</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- Case 3 -->
+        <div class="border-2 border-[#10201d] p-4 bg-white shadow-[4px_4px_0_#10201d]">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-barlow font-black text-lg uppercase text-[#10201d]">
+              Case 03: Mobile Viewport 100vw Scrollbar Blowout
+            </span>
+            <span class="font-mono text-[10px] font-bold px-2 py-0.5 bg-[#e97b77] border border-[#10201d] text-[#10201d]">
+              VIEWPORT METRICS
+            </span>
+          </div>
+          <p class="font-sans text-xs text-[#34433f] mb-3">
+            <strong>The Bug:</strong> <code class="text-[#671912] font-mono">100vw</code> includes the vertical scrollbar width, forcing the content width to exceed the mobile device screen and causing horizontal layout scroll on phones.
+          </p>
+          <div class="grid grid-cols-2 gap-3 font-mono text-[11px]">
+            <div class="p-2.5 bg-[#f2f2eb] border-2 border-[#10201d]">
+              <span class="text-[#e53927] font-bold block mb-1">❌ BUGGY (100vw Overflow)</span>
+              <code>.hero { width: 100vw; font-size: 42px; }</code>
+            </div>
+            <div class="p-2.5 bg-[#243633] text-[#f7f7f2] border-2 border-[#10201d]">
+              <span class="text-[#f5b726] font-bold block mb-1">✅ GEMMA 4 PATCH</span>
+              <code>.hero { width: 100%; font-size: clamp(1.5rem, 5vw, 2.5rem); }</code>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t-2 border-[#10201d] bg-[#f2f2eb] flex justify-end">
+        <button onclick="toggleJudgeModal(false)" class="hf-btn hf-btn-coral text-xs">
+          OK, GOT IT
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- FOOTER                                      -->
+  <!-- ═══════════════════════════════════════════ -->
+  <footer class="border-t-2 border-[#10201d] bg-[#182522] py-4 px-8 mt-6">
+    <div class="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 font-mono text-xs text-[#8bb2de]">
+      <span>GEMMALENS 26 &bull; Automated Visual Defect Triage</span>
+      <span>Enterprise QA &bull; Status: Operational</span>
+    </div>
+  </footer>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- APPLICATION LOGIC & CUSTOM CURSOR           -->
+  <!-- ═══════════════════════════════════════════ -->
+  <script>
+    // ─── Hacktoberfest Smooth Cursor Movement ─────
+    const cursorDot  = document.getElementById('cursor-dot');
+    const cursorRing = document.getElementById('cursor-ring');
+
+    let mouseX = -100, mouseY = -100;
+    let ringX  = -100, ringY  = -100;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.left = `${mouseX}px`;
+      cursorDot.style.top  = `${mouseY}px`;
+    });
+
+    // Smooth lerp trailing animation for the ring
+    function renderCursor() {
+      ringX += (mouseX - ringX) * 0.18;
+      ringY += (mouseY - ringY) * 0.18;
+      cursorRing.style.left = `${ringX}px`;
+      cursorRing.style.top  = `${ringY}px`;
+      requestAnimationFrame(renderCursor);
+    }
+    requestAnimationFrame(renderCursor);
+
+    // Expand cursor ring when hovering clickable elements
+    function bindCursorHover() {
+      const targets = document.querySelectorAll('a, button, input, textarea, select, .hf-tab, .hf-btn, #drop-zone');
+      targets.forEach(el => {
+        el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+        el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+        el.addEventListener('mousedown',  () => document.body.classList.add('cursor-active'));
+        el.addEventListener('mouseup',    () => document.body.classList.remove('cursor-active'));
+      });
+    }
+    bindCursorHover();
+
+    // ─── Application State ────────────────────────
+    let selectedFile = null;
+    let currentRawReport = '';
+    let sampleCases = [];
+
+    const dropZone         = document.getElementById('drop-zone');
+    const fileInput        = document.getElementById('file-input');
+    const uploadPrompt     = document.getElementById('upload-prompt');
+    const previewContainer = document.getElementById('preview-container');
+    const imagePreview     = document.getElementById('image-preview');
+    const previewMeta      = document.getElementById('preview-meta');
+    const removeBtn        = document.getElementById('remove-btn');
+    const triageBtn        = document.getElementById('triage-btn');
+    const issueDescription = document.getElementById('issue-description');
+    const charCount        = document.getElementById('char-count');
+    const modelSelect      = document.getElementById('model-select');
+    const scanline         = document.getElementById('scanline');
+
+    const stateEmpty       = document.getElementById('state-empty');
+    const stateLoading     = document.getElementById('state-loading');
+    const stateReport      = document.getElementById('state-report');
+    const stateError       = document.getElementById('state-error');
+    const markdownOutput   = document.getElementById('markdown-output');
+    const errorMessageText = document.getElementById('error-message-text');
+    const reportActions    = document.getElementById('report-actions');
+    const loadingStage     = document.getElementById('loading-stage');
+
+    // ─── API Base URL ─────────────────────────────
+    const API_BASE = (window.location.port === '8000') ? '' : 'http://localhost:8000';
+
+    // ─── Health check ─────────────────────────────
+    async function checkHealth() {
+      const badge = document.getElementById('backend-status-badge');
+      const text  = document.getElementById('backend-status-text');
+      const dot   = badge.querySelector('span');
+      try {
+        const res  = await fetch(`${API_BASE}/api/health`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (data.api_key_configured) {
+          text.textContent = 'ONLINE';
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          badge.className = 'flex items-center gap-2 px-3 py-1 border-2 border-[#10201d] font-mono text-xs font-bold bg-[#243633] text-emerald-400 shadow-[2px_2px_0_#10201d]';
+        } else {
+          text.textContent = 'KEY MISSING';
+          dot.className = 'w-2 h-2 rounded-full bg-[#f5b726] animate-pulse';
+          badge.className = 'flex items-center gap-2 px-3 py-1 border-2 border-[#10201d] font-mono text-xs font-bold bg-[#243633] text-[#f5b726] shadow-[2px_2px_0_#10201d]';
+        }
+      } catch {
+        text.textContent = 'OFFLINE';
+        dot.className = 'w-2 h-2 rounded-full bg-[#e53927]';
+        badge.className = 'flex items-center gap-2 px-3 py-1 border-2 border-[#10201d] font-mono text-xs font-bold bg-[#243633] text-[#e53927] shadow-[2px_2px_0_#10201d]';
+      }
+    }
+
+    // ─── Fetch samples ────────────────────────────
+    async function fetchSamples() {
+      try {
+        const res = await fetch(`${API_BASE}/api/samples`);
+        if (res.ok) sampleCases = await res.json();
+      } catch(e) { console.warn('Could not fetch samples:', e); }
+    }
+
+    // ─── Judge modal toggle ───────────────────────
+    function toggleJudgeModal(show) {
+      const m = document.getElementById('judge-modal');
+      show ? m.classList.remove('hidden') : m.classList.add('hidden');
+    }
+
+    // ─── Drag & Drop ──────────────────────────────
+    ['dragenter','dragover'].forEach(ev => {
+      dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    });
+    ['dragleave','drop'].forEach(ev => {
+      dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('drag-over'); });
+    });
+    dropZone.addEventListener('drop', e => {
+      const f = e.dataTransfer.files[0];
+      if (f && f.type.startsWith('image/')) handleFileSelect(f);
+    });
+    fileInput.addEventListener('change', e => {
+      if (e.target.files[0]) handleFileSelect(e.target.files[0]);
+    });
+
+    function handleFileSelect(file) {
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          imagePreview.src = e.target.result;
+          previewMeta.textContent = `${img.naturalWidth}×${img.naturalHeight} · ${(file.size/1024).toFixed(0)}KB`;
+          uploadPrompt.classList.add('hidden');
+          previewContainer.classList.remove('hidden');
+          triageBtn.removeAttribute('disabled');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    removeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      clearFile();
+    });
+
+    function clearFile() {
+      selectedFile = null;
+      fileInput.value = '';
+      imagePreview.src = '';
+      previewContainer.classList.add('hidden');
+      uploadPrompt.classList.remove('hidden');
+      triageBtn.setAttribute('disabled', 'true');
+    }
+
+    issueDescription.addEventListener('input', () => {
+      charCount.textContent = `${issueDescription.value.length} / 1000`;
+    });
+
+    // ─── Canvas sample bug generators ─────────────
+    function generateSampleBugImage(idx) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 800; canvas.height = 480;
+      const ctx = canvas.getContext('2d');
+
+      if (idx === 0) {
+        // Case 1: Flexbox overlap
+        ctx.fillStyle = '#182522'; ctx.fillRect(0,0,800,480);
+        ctx.fillStyle = '#243633'; ctx.fillRect(40,40,720,400);
+        ctx.strokeStyle = '#10201d'; ctx.lineWidth = 4; ctx.strokeRect(40,40,720,400);
+
+        ctx.fillStyle = '#f7f7f2'; ctx.font = 'bold 20px "Barlow Semi Condensed", sans-serif';
+        ctx.fillText('INCIDENT DASHBOARD // KUBERNETES CLUSTER', 70, 95);
+
+        ctx.fillStyle = '#2e4742'; ctx.fillRect(70,120,480,70);
+        ctx.strokeRect(70,120,480,70);
+
+        ctx.fillStyle = '#f7f7f2'; ctx.font = '600 16px Inter, sans-serif';
+        ctx.fillText('Critical Payment Gateway Webhook Latency Spikes in Production us-east-1', 85, 160);
+
+        ctx.fillStyle = '#e53927'; ctx.fillRect(430,132,105,42);
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 13px "Martian Mono", monospace';
+        ctx.fillText('P0 BLOCKED', 440, 158);
+
+        ctx.strokeStyle = '#e53927'; ctx.lineWidth = 3;
+        ctx.strokeRect(420,125,125,60);
+        ctx.fillStyle = '#e53927'; ctx.font = 'bold 12px "Martian Mono", monospace';
+        ctx.fillText('⚠ COLLISION: MISSING min-width: 0', 330, 230);
+
+      } else if (idx === 1) {
+        // Case 2: Modal Z-clip
+        ctx.fillStyle = '#10201d'; ctx.fillRect(0,0,800,480);
+        ctx.fillStyle = '#243633'; ctx.fillRect(40,40,240,400);
+        ctx.strokeStyle = '#10201d'; ctx.lineWidth = 4; ctx.strokeRect(40,40,240,400);
+
+        ctx.fillStyle = '#8bb2de'; ctx.font = 'bold 16px "Martian Mono", monospace';
+        ctx.fillText('SIDEBAR (z: 10)', 60, 80);
+
+        ctx.fillStyle = '#2e4742'; ctx.fillRect(280,40,480,400);
+        ctx.strokeRect(280,40,480,400);
+        ctx.fillStyle = '#f7f7f2'; ctx.font = '14px Inter, sans-serif';
+        ctx.fillText('Parent Container (.card with transform: translate3d)', 305, 80);
+
+        ctx.fillStyle = 'rgba(16, 32, 29, 0.75)'; ctx.fillRect(280,40,480,400);
+        ctx.fillStyle = '#3d5f58'; ctx.fillRect(220,140,360,200);
+        ctx.strokeStyle = '#8bb2de'; ctx.strokeRect(220,140,360,200);
+
+        ctx.strokeStyle = '#e53927'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(280,140); ctx.lineTo(280,340); ctx.stroke();
+
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px "Barlow Semi Condensed", sans-serif';
+        ctx.fillText('CONFIRM CLUSTER DELETION', 300, 180);
+        ctx.fillStyle = '#e53927'; ctx.font = 'bold 12px "Martian Mono", monospace';
+        ctx.fillText('⚠ Z-INDEX TRAP: CLIPPED BY SIDEBAR', 225, 370);
+
+      } else {
+        // Case 3: Mobile 100vw blowout
+        ctx.fillStyle = '#10201d'; ctx.fillRect(0,0,800,480);
+        ctx.fillStyle = '#182522'; ctx.fillRect(160,20,375,440);
+        ctx.strokeStyle = '#3d5f58'; ctx.lineWidth = 3; ctx.strokeRect(160,20,375,440);
+
+        ctx.fillStyle = '#f7f7f2'; ctx.font = 'bold 18px "Barlow Semi Condensed", sans-serif';
+        ctx.fillText('MOBILE STOREFRONT // 375PX VIEWPORT', 180, 60);
+
+        ctx.fillStyle = '#243633'; ctx.fillRect(180,90,440,80);
+        ctx.strokeStyle = '#f5b726'; ctx.lineWidth = 3; ctx.strokeRect(180,90,440,80);
+
+        ctx.fillStyle = '#f7f7f2'; ctx.font = 'bold 22px "Barlow Semi Condensed", sans-serif';
+        ctx.fillText('SUPER ULTRA PROMO BANNER (100VW)', 195, 140);
+
+        ctx.fillStyle = 'rgba(245, 183, 38, 0.25)'; ctx.fillRect(535,20,85,440);
+        ctx.fillStyle = '#f5b726'; ctx.font = 'bold 12px "Martian Mono", monospace';
+        ctx.fillText('HORIZONTAL SCROLLBAR BLOWOUT (100VW > 375PX)', 190, 230);
+
+        ctx.strokeStyle = '#e53927'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(535,20); ctx.lineTo(535,460); ctx.stroke();
+      }
+
+      return new Promise(resolve => {
+        canvas.toBlob(blob => resolve(new File([blob], `hacktoberfest_sample_${idx+1}.png`, { type: 'image/png' })), 'image/png');
+      });
+    }
+
+    async function loadSampleCase(idx) {
+      [0,1,2].forEach(i => document.getElementById(`tab-${i}`).classList.remove('active'));
+      document.getElementById(`tab-${idx}`).classList.add('active');
+
+      const file = await generateSampleBugImage(idx);
+      handleFileSelect(file);
+
+      const fallbacks = [
+        'Flexbox Child Overlap: Title text in card row does not truncate with ellipsis; action badge collides with unclipped text.',
+        'Modal Z-Index Trap: Dialog with z-index: 9999 renders behind sidebar due to transform on parent card creating an isolated stacking context.',
+        'Mobile Viewport Horizontal Scroll: Content extends past 375px mobile viewport because banner uses width: 100vw instead of 100%.'
+      ];
+      issueDescription.value = sampleCases[idx]
+        ? `${sampleCases[idx].title}: ${sampleCases[idx].description}`
+        : fallbacks[idx];
+      charCount.textContent = `${issueDescription.value.length} / 1000`;
+    }
+
+    // ─── Execute Triage ───────────────────────────
+    triageBtn.addEventListener('click', runTriage);
+
+    async function runTriage() {
+      if (!selectedFile) return;
+
+      [stateEmpty, stateReport, stateError].forEach(el => el.classList.add('hidden'));
+      stateLoading.classList.remove('hidden');
+      reportActions.classList.add('hidden');
+      scanline.classList.remove('hidden');
+      triageBtn.setAttribute('disabled', 'true');
+
+      const startTime = performance.now();
+      const timerInterval = setInterval(() => {
+        const sec = ((performance.now() - startTime) / 1000).toFixed(1);
+        document.getElementById('btn-text').textContent = `ANALYZING (${sec}s)...`;
+      }, 100);
+
+      const stages = [
+        'Inspecting Rendered Pixels...',
+        'Mapping Bounding Box Anomalies...',
+        'Evaluating CSS Stacking Contexts...',
+        'Synthesizing Hacktoberfest CSS Patch...'
+      ];
+      let si = 0;
+      const stageInterval = setInterval(() => {
+        si = (si + 1) % stages.length;
+        loadingStage.textContent = stages[si];
+      }, 1400);
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('description', issueDescription.value);
+      formData.append('model', modelSelect.value);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/triage`, { method: 'POST', body: formData });
+        clearInterval(stageInterval);
+        clearInterval(timerInterval);
+        scanline.classList.add('hidden');
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ detail: res.statusText }));
+          throw new Error(errData.detail || `Server error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        currentRawReport = data.report;
+
+        const totalSec = data.elapsed_seconds || ((performance.now() - startTime) / 1000).toFixed(1);
+        document.getElementById('latency-badge').textContent = `⚡ ${totalSec}s`;
+
+        markdownOutput.innerHTML = marked.parse(data.report);
+        document.querySelectorAll('#markdown-output pre code').forEach(el => hljs.highlightElement(el));
+        enhanceCodeBlocks(markdownOutput);
+
+        stateLoading.classList.add('hidden');
+        stateReport.classList.remove('hidden');
+        reportActions.classList.remove('hidden');
+        reportActions.classList.add('flex');
+
+      } catch(err) {
+        clearInterval(stageInterval);
+        clearInterval(timerInterval);
+        scanline.classList.add('hidden');
+        stateLoading.classList.add('hidden');
+        stateError.classList.remove('hidden');
+        errorMessageText.textContent = err.message;
+      } finally {
+        clearInterval(timerInterval);
+        triageBtn.removeAttribute('disabled');
+        document.getElementById('btn-text').textContent = 'EXECUTE VISUAL TRIAGE';
+      }
+    }
+
+    // ─── Code Block Highlight Parser (Red Buggy / Green Fixed) ───
+    function enhanceCodeBlocks(container) {
+      if (!container) return;
+      const pres = container.querySelectorAll('pre');
+      pres.forEach(pre => {
+        // Collect text from preceding siblings to detect context
+        let prev = pre.previousElementSibling;
+        let contextText = '';
+        let steps = 0;
+        while (prev && steps < 4) {
+          contextText += ' ' + prev.textContent.toLowerCase();
+          if (/^h[1-2]$/i.test(prev.tagName)) break;
+          prev = prev.previousElementSibling;
+          steps++;
+        }
+
+        const code = pre.querySelector('code');
+        const isBuggy = /buggy|root\s*cause|flawed|before|error|collision|anomal|❌/i.test(contextText);
+        const isFixed = /fixed|patch|patched|after|correct|solution|recommend|✅/i.test(contextText);
+
+        if (isBuggy && !isFixed) {
+          pre.classList.add('code-buggy-card');
+          const badge = document.createElement('div');
+          badge.className = 'code-buggy-header';
+          badge.innerHTML = '❌ ROOT CAUSE CODE (BUGGY)';
+          pre.parentNode.insertBefore(badge, pre);
+          if (code) {
+            code.style.color = '#fca5a5';
+          }
+        } else if (isFixed) {
+          pre.classList.add('code-fixed-card');
+          const badge = document.createElement('div');
+          badge.className = 'code-fixed-header';
+          badge.innerHTML = '✅ PATCHED CODE (FIXED)';
+          pre.parentNode.insertBefore(badge, pre);
+          if (code) {
+            code.style.color = '#86efac';
+          }
+        }
+
+        // Parse line-by-line diff markers inside code blocks
+        if (code) {
+          const lines = code.innerHTML.split('\n');
+          let hasDiff = false;
+          const formatted = lines.map(line => {
+            const trimmed = line.trimStart();
+            if (trimmed.startsWith('-') || trimmed.startsWith('&minus;')) {
+              hasDiff = true;
+              return `<span class="diff-del-line">${line}</span>`;
+            } else if (trimmed.startsWith('+')) {
+              hasDiff = true;
+              return `<span class="diff-add-line">${line}</span>`;
+            }
+            return line;
+          });
+          if (hasDiff) {
+            code.innerHTML = formatted.join('\n');
+          }
+        }
+      });
+    }
+
+    function retryTriage() { runTriage(); }
+
+    function copyReport() {
+      if (!currentRawReport) return;
+      navigator.clipboard.writeText(currentRawReport).then(() => {
+        const t = document.getElementById('copy-btn-text');
+        t.textContent = '✓ COPIED!';
+        setTimeout(() => { t.textContent = 'COPY .MD'; }, 2000);
+      });
+    }
+
+    function downloadReport() {
+      if (!currentRawReport) return;
+      const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(new Blob([currentRawReport], { type: 'text/markdown' })),
+        download: `hacktoberfest-gemmalens-report-${Date.now()}.md`
+      });
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // ─── Initialize ───────────────────────────────
+    checkHealth();
+    fetchSamples();
+  </script>
+</body>
+</html>
