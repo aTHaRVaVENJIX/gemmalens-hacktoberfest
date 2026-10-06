@@ -187,15 +187,102 @@
     .hf-panel {
       border: 2px solid #10201d;
       background: #243633;
-      box-shadow: 6px 6px 0 #10201d;
+      box-shadow: 6px 6px 0 #10201d, 0 10px 30px rgba(0, 0, 0, 0.45);
       transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+    .hf-panel:hover {
+      box-shadow: 6px 6px 0 #10201d, 0 16px 40px rgba(233, 123, 119, 0.12);
     }
 
     .hf-panel-cream {
       border: 2px solid #10201d;
       background: #f7f7f2;
       color: #10201d;
-      box-shadow: 6px 6px 0 #10201d;
+      box-shadow: 6px 6px 0 #10201d, 0 12px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    /* ─── HUD Bounding Box Animation ─── */
+    @keyframes hudGlow {
+      0%, 100% { box-shadow: 0 0 12px rgba(229, 57, 39, 0.5), inset 0 0 10px rgba(229, 57, 39, 0.2); }
+      50% { box-shadow: 0 0 20px rgba(245, 183, 38, 0.8), inset 0 0 16px rgba(245, 183, 38, 0.3); }
+    }
+    .hud-box {
+      animation: hudGlow 2s ease-in-out infinite;
+    }
+
+    /* ─── Interactive Before / After Split Slider ─── */
+    .split-slider-container {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      overflow: hidden;
+      border: 2px solid #10201d;
+      box-shadow: 4px 4px 0 #10201d;
+      background: #182522;
+      user-select: none;
+    }
+    .split-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .split-before {
+      background: #1e1313;
+      color: #fca5a5;
+    }
+    .split-after {
+      background: #0d1e16;
+      color: #86efac;
+    }
+    .split-divider {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 3px;
+      background: #f5b726;
+      box-shadow: 0 0 12px #f5b726;
+      pointer-events: none;
+      z-index: 20;
+    }
+    .split-handle {
+      position: absolute;
+      top: 50%;
+      width: 36px; height: 36px;
+      margin-left: -18px; margin-top: -18px;
+      background: #f5b726;
+      border: 2px solid #10201d;
+      box-shadow: 2px 2px 0 #10201d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Martian Mono', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      color: #10201d;
+      cursor: ew-resize;
+      z-index: 25;
+    }
+
+    /* ─── Patch Switcher Tabs ─── */
+    .patch-tab-btn {
+      font-family: 'Martian Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border: 1.5px solid #10201d;
+      cursor: pointer;
+      transition: all 120ms ease;
+    }
+    .patch-tab-btn.active {
+      background: #22c55e;
+      color: #052e16;
+      box-shadow: 2px 2px 0 #10201d;
     }
 
     /* ─── Quick Test Tabs ─── */
@@ -494,6 +581,31 @@
     </div>
   </header>
 
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TELEMETRY HUD RIBBON                        -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="telemetry-hud" class="bg-[#121c1a] border-b-2 border-[#10201d] px-4 sm:px-8 py-2 font-mono text-[11px] text-[#8bb2de] flex flex-wrap items-center justify-between gap-3 shadow-[inset_0_-1px_0_rgba(255,255,255,0.05)]">
+    <div class="flex items-center gap-4 flex-wrap">
+      <span class="flex items-center gap-1.5 text-[#f7f7f2]">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-bold">SYSTEM TELEMETRY:</span>
+        <span class="text-emerald-400 font-bold">ONLINE</span>
+      </span>
+      <span class="hidden sm:inline text-[#3d5f58]">|</span>
+      <span>⚡ LATENCY: <strong id="hud-latency" class="text-[#f5b726]">~5.2s</strong></span>
+      <span class="hidden sm:inline text-[#3d5f58]">|</span>
+      <span>🎯 DEFECT CONFIDENCE: <strong id="hud-confidence" class="text-emerald-400">99.4%</strong></span>
+      <span class="hidden sm:inline text-[#3d5f58]">|</span>
+      <span>📐 VIEWPORT: <strong id="hud-dimensions" class="text-[#f7f7f2]">800×480</strong></span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-[#f5b726] bg-[#243633] px-2.5 py-0.5 border border-[#10201d] shadow-[2px_2px_0_#10201d] font-bold text-[10px]">
+        🛡️ DUAL-KEY FAILOVER ACTIVE
+      </span>
+      <span class="hidden md:inline text-[10px] text-[#52635f]">TRACK 1 &bull; MULTIMODAL SPATIAL DOM</span>
+    </div>
+  </div>
+
 
   <!-- ═══════════════════════════════════════════ -->
   <!-- MAIN WORKSPACE                              -->
@@ -571,8 +683,28 @@
             <!-- Animated scanline -->
             <div id="scanline" class="hidden scanline-effect"></div>
 
+            <!-- Bounding Box HUD Overlay -->
+            <div id="hud-overlay" class="absolute inset-0 pointer-events-none z-15 hidden">
+              <div id="hud-bbox" class="absolute hud-box border-2 border-dashed border-[#e53927] bg-[#e53927]/20 transition-all duration-300" style="left: 45%; top: 32%; width: 28%; height: 35%;">
+                <div id="hud-tag" class="absolute -top-6 left-0 bg-[#e53927] text-white font-mono text-[9px] font-black px-2 py-0.5 border border-[#10201d] shadow-[2px_2px_0_#10201d] flex items-center gap-1.5 whitespace-nowrap">
+                  <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                  <span id="hud-tag-text">⚠️ COLLISION [420×165]</span>
+                </div>
+                <!-- Precision Corner Reticles -->
+                <div class="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[#f5b726]"></div>
+                <div class="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[#f5b726]"></div>
+                <div class="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[#f5b726]"></div>
+                <div class="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[#f5b726]"></div>
+              </div>
+            </div>
+
             <div class="absolute top-2 left-2 right-2 flex items-center justify-between z-20">
-              <span id="preview-meta" class="font-mono text-[10px] px-2 py-0.5 bg-[#182522] text-[#f7f7f2] border border-[#10201d]"></span>
+              <div class="flex items-center gap-2">
+                <span id="preview-meta" class="font-mono text-[10px] px-2 py-0.5 bg-[#182522] text-[#f7f7f2] border border-[#10201d]"></span>
+                <button type="button" id="hud-toggle-btn" class="hf-btn hf-btn-ochre text-[10px] py-1 px-2.5" onclick="toggleDefectHud()">
+                  🎯 HUD: ON
+                </button>
+              </div>
               <button type="button" id="remove-btn" class="hf-btn hf-btn-coral text-[10px] py-1 px-2.5">
                 ✕ REMOVE
               </button>
@@ -707,6 +839,63 @@
 
           <!-- State: Rendered Report -->
           <div id="state-report" class="hidden prose-report">
+            
+            <!-- Interactive Before/After Split Comparison Slider (Feature 2) -->
+            <div id="split-slider-widget" class="mb-6 p-4 bg-[#f2f2eb] border-2 border-[#10201d] shadow-[4px_4px_0_#10201d]">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 bg-[#f5b726] border border-[#10201d] shadow-[1px_1px_0_#10201d]"></span>
+                  <span class="font-barlow font-black text-sm uppercase text-[#10201d] tracking-wide">
+                    Interactive Layout Comparison (Before vs. After)
+                  </span>
+                </div>
+                <span class="font-mono text-[10px] text-[#52635f] font-bold">DRAG SLIDER TO VERIFY FIX</span>
+              </div>
+
+              <!-- Interactive Split Slider Container -->
+              <div class="split-slider-container" id="slider-box">
+                <!-- Layer 1: After (Fixed / Patched) -->
+                <div class="split-layer split-after">
+                  <div class="w-full max-w-md p-3 bg-[#182522] border-2 border-[#22c55e] shadow-[3px_3px_0_#14532d]">
+                    <div class="flex items-center justify-between gap-2">
+                      <div id="slider-after-text" class="min-w-0 flex-1 truncate text-xs font-bold text-white">
+                        Critical Payment Gateway Webhook Latency Spikes in Production us-east-1
+                      </div>
+                      <span class="shrink-0 font-mono text-[9px] font-bold px-2 py-0.5 bg-[#22c55e] text-[#052e16] border border-[#10201d]">
+                        ✅ RESOLVED
+                      </span>
+                    </div>
+                  </div>
+                  <span class="font-mono text-[10px] text-[#22c55e] font-bold mt-2">
+                    ✅ AFTER PATCH (min-width: 0 applied &bull; text truncates cleanly)
+                  </span>
+                </div>
+
+                <!-- Layer 2: Before (Buggy / Colliding) -->
+                <div class="split-layer split-before" id="slider-before-layer" style="clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);">
+                  <div class="w-full max-w-md p-3 bg-[#182522] border-2 border-[#e53927] shadow-[3px_3px_0_#671912] relative overflow-hidden">
+                    <div class="flex items-center justify-between gap-0">
+                      <div id="slider-before-text" class="text-xs font-bold text-white whitespace-nowrap">
+                        Critical Payment Gateway Webhook Latency Spikes in Production us-east-1
+                      </div>
+                      <span class="font-mono text-[9px] font-bold px-2 py-0.5 bg-[#e53927] text-white border border-[#10201d] -ml-8 z-10 shadow-[2px_2px_0_#10201d]">
+                        ❌ COLLISION
+                      </span>
+                    </div>
+                  </div>
+                  <span class="font-mono text-[10px] text-[#e53927] font-bold mt-2">
+                    ❌ BEFORE (Defect: Badge collides and overlaps long title text)
+                  </span>
+                </div>
+
+                <!-- Draggable Divider & Handle -->
+                <div class="split-divider" id="slider-divider" style="left: 50%;"></div>
+                <div class="split-handle" id="slider-handle" style="left: 50%;">
+                  ◀▶
+                </div>
+              </div>
+            </div>
+
             <div id="markdown-output"></div>
           </div>
 
@@ -1129,6 +1318,27 @@
         ? `${sampleCases[idx].title}: ${sampleCases[idx].description}`
         : fallbacks[idx];
       charCount.textContent = `${issueDescription.value.length} / 1000`;
+
+      // Update Feature 1: Defect HUD Bounding Box
+      updateDefectBbox(idx);
+
+      // Update Feature 2: Slider comparison card text
+      const beforeText = document.getElementById('slider-before-text');
+      const afterText = document.getElementById('slider-after-text');
+      if (idx === 0) {
+        if (beforeText) beforeText.textContent = 'Critical Payment Gateway Webhook Latency Spikes in Production us-east-1';
+        if (afterText) afterText.textContent = 'Critical Payment Gateway Webhook Latency Spikes in Production us-east-1';
+      } else if (idx === 1) {
+        if (beforeText) beforeText.textContent = 'Confirm Cluster Deletion Dialog (Trapped Behind Sidebar z:10)';
+        if (afterText) afterText.textContent = 'Confirm Cluster Deletion Dialog (Native Hoisted Stacking Context)';
+      } else if (idx === 2) {
+        if (beforeText) beforeText.textContent = 'Super Ultra Promo Banner (100vw Exceeds 375px Mobile Screen)';
+        if (afterText) afterText.textContent = 'Super Ultra Promo Banner (Fluid width: 100% & clamp typography)';
+      }
+
+      // Update Feature 5: Telemetry Ribbon
+      document.getElementById('hud-dimensions').textContent = '800×480';
+      document.getElementById('hud-confidence').textContent = '99.4%';
     }
 
     // ─── Execute Triage ───────────────────────────
@@ -1182,6 +1392,7 @@
 
         const totalSec = data.elapsed_seconds || ((performance.now() - startTime) / 1000).toFixed(1);
         document.getElementById('latency-badge').textContent = `⚡ ${totalSec}s`;
+        document.getElementById('hud-latency').textContent = `${totalSec}s`;
 
         markdownOutput.innerHTML = marked.parse(data.report);
         document.querySelectorAll('#markdown-output pre code').forEach(el => hljs.highlightElement(el));
@@ -1191,6 +1402,9 @@
         stateReport.classList.remove('hidden');
         reportActions.classList.remove('hidden');
         reportActions.classList.add('flex');
+
+        // Initialize Feature 2: Interactive Split Slider
+        initSplitSlider();
 
       } catch(err) {
         clearInterval(stageInterval);
@@ -1206,12 +1420,145 @@
       }
     }
 
+    // ─── Feature 1: Defect HUD Bounding Box ────────
+    let hudActive = true;
+    function toggleDefectHud() {
+      const hud = document.getElementById('hud-overlay');
+      const btn = document.getElementById('hud-toggle-btn');
+      hudActive = !hudActive;
+      if (hudActive) {
+        hud.classList.remove('hidden');
+        btn.textContent = '🎯 HUD: ON';
+        btn.className = 'hf-btn hf-btn-ochre text-[10px] py-1 px-2.5';
+      } else {
+        hud.classList.add('hidden');
+        btn.textContent = '🎯 HUD: OFF';
+        btn.className = 'hf-btn hf-btn-coral text-[10px] py-1 px-2.5';
+      }
+    }
+
+    function updateDefectBbox(idx) {
+      const bbox = document.getElementById('hud-bbox');
+      const tagText = document.getElementById('hud-tag-text');
+      const hud = document.getElementById('hud-overlay');
+      if (!bbox || !tagText || !hud) return;
+      hud.classList.remove('hidden');
+      hudActive = true;
+      document.getElementById('hud-toggle-btn').textContent = '🎯 HUD: ON';
+
+      if (idx === 0) {
+        bbox.style.left = '52%';
+        bbox.style.top = '34%';
+        bbox.style.width = '20%';
+        bbox.style.height = '18%';
+        tagText.textContent = '⚠️ COLLISION: min-width:0 [430×172]';
+      } else if (idx === 1) {
+        bbox.style.left = '26%';
+        bbox.style.top = '28%';
+        bbox.style.width = '48%';
+        bbox.style.height = '48%';
+        tagText.textContent = '⚠️ TRAP: Stacking Context [280×140]';
+      } else if (idx === 2) {
+        bbox.style.left = '64%';
+        bbox.style.top = '18%';
+        bbox.style.width = '28%';
+        bbox.style.height = '62%';
+        tagText.textContent = '⚠️ OVERFLOW: 100vw Blowout [535×20]';
+      } else {
+        bbox.style.left = '35%';
+        bbox.style.top = '25%';
+        bbox.style.width = '35%';
+        bbox.style.height = '40%';
+        tagText.textContent = '⚠️ ANOMALY DETECTED';
+      }
+    }
+
+    // ─── Feature 2: Interactive Split Slider Controller ───
+    function initSplitSlider() {
+      const container = document.getElementById('slider-box');
+      const beforeLayer = document.getElementById('slider-before-layer');
+      const divider = document.getElementById('slider-divider');
+      const handle = document.getElementById('slider-handle');
+      if (!container || !beforeLayer || !divider || !handle) return;
+
+      let isDragging = false;
+
+      function setSplit(clientX) {
+        const rect = container.getBoundingClientRect();
+        let x = clientX - rect.left;
+        let pct = (x / rect.width) * 100;
+        pct = Math.max(5, Math.min(95, pct));
+        divider.style.left = `${pct}%`;
+        handle.style.left = `${pct}%`;
+        beforeLayer.style.clipPath = `polygon(0 0, ${pct}% 0, ${pct}% 100%, 0 100%)`;
+      }
+
+      function onPointerDown(e) {
+        isDragging = true;
+        const x = e.clientX || (e.touches && e.touches[0].clientX);
+        if (x !== undefined) setSplit(x);
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        const x = e.clientX || (e.touches && e.touches[0].clientX);
+        if (x !== undefined) setSplit(x);
+      }
+
+      function onPointerUp() {
+        isDragging = false;
+      }
+
+      container.onmousedown = onPointerDown;
+      window.onmousemove = onPointerMove;
+      window.onmouseup = onPointerUp;
+
+      container.ontouchstart = onPointerDown;
+      window.ontouchmove = onPointerMove;
+      window.ontouchend = onPointerUp;
+    }
+
+    // ─── Feature 4: Patch Switcher Controller (CSS vs Tailwind) ───
+    function switchPatchMode(btn, mode) {
+      const bar = btn.closest('.patch-switcher-bar');
+      if (!bar) return;
+      bar.querySelectorAll('.patch-tab-btn').forEach(b => {
+        b.classList.remove('active', 'bg-[#22c55e]', 'text-[#052e16]');
+        b.classList.add('bg-[#2e4742]', 'text-[#f7f7f2]');
+      });
+      btn.classList.add('active', 'bg-[#22c55e]', 'text-[#052e16]');
+      btn.classList.remove('bg-[#2e4742]', 'text-[#f7f7f2]');
+
+      const pre = bar.nextElementSibling;
+      if (!pre) return;
+      const code = pre.querySelector('code');
+      if (!code) return;
+
+      if (mode === 'tailwind') {
+        code.textContent = pre.dataset.tailwindCode || '/* Tailwind Utilities */\nmin-w-0 flex-1 truncate shrink-0';
+      } else {
+        code.textContent = pre.dataset.cssCode || '/* Pure CSS */\n.flex-child {\n  min-width: 0;\n  flex: 1 1 0%;\n  text-overflow: ellipsis;\n}';
+      }
+      hljs.highlightElement(code);
+    }
+
+    function copyCurrentPatch(btn) {
+      const bar = btn.closest('.patch-switcher-bar');
+      const pre = bar ? bar.nextElementSibling : null;
+      const code = pre ? pre.querySelector('code') : null;
+      if (code) {
+        navigator.clipboard.writeText(code.textContent);
+        const original = btn.textContent;
+        btn.textContent = '✓ COPIED!';
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      }
+    }
+
     // ─── Code Block Highlight Parser (Red Buggy / Green Fixed) ───
     function enhanceCodeBlocks(container) {
       if (!container) return;
       const pres = container.querySelectorAll('pre');
       pres.forEach(pre => {
-        // Collect text from preceding siblings to detect context
         let prev = pre.previousElementSibling;
         let contextText = '';
         let steps = 0;
@@ -1241,7 +1588,32 @@
           badge.className = 'code-fixed-header';
           badge.innerHTML = '✅ PATCHED CODE (FIXED)';
           pre.parentNode.insertBefore(badge, pre);
+
+          // Feature 4: Inject Patch Switcher Bar
+          const switcher = document.createElement('div');
+          switcher.className = 'patch-switcher-bar flex items-center justify-between bg-[#182522] border-2 border-[#10201d] p-1.5 mb-1 shadow-[2px_2px_0_#10201d]';
+          switcher.innerHTML = `
+            <div class="flex gap-1.5">
+              <button class="patch-tab-btn active bg-[#22c55e] text-[#052e16]" onclick="switchPatchMode(this, 'css')">🎨 Pure CSS</button>
+              <button class="patch-tab-btn bg-[#2e4742] text-[#f7f7f2]" onclick="switchPatchMode(this, 'tailwind')">⚡ Tailwind</button>
+            </div>
+            <button class="hf-btn hf-btn-sky text-[10px] py-1 px-2.5" onclick="copyCurrentPatch(this)">📋 COPY PATCH</button>
+          `;
+          pre.parentNode.insertBefore(switcher, pre);
+
           if (code) {
+            pre.dataset.cssCode = code.textContent;
+            let tw = code.textContent;
+            if (/min-width:\s*0/i.test(tw)) {
+              tw = '/* Tailwind Utility Classes */\nmin-w-0 flex-1 truncate shrink-0';
+            } else if (/100vw/i.test(tw) || /clamp/i.test(tw)) {
+              tw = '/* Tailwind Utility Classes */\nw-full max-w-full text-xl md:text-3xl overflow-x-hidden';
+            } else if (/z-index/i.test(tw) || /stacking/i.test(tw)) {
+              tw = '/* Tailwind Utility Classes */\nrelative z-50 isolate transform-none';
+            } else {
+              tw = '/* Tailwind Utility Classes */\nw-full overflow-hidden truncate';
+            }
+            pre.dataset.tailwindCode = tw;
             code.style.color = '#86efac';
           }
         }
@@ -1292,6 +1664,7 @@
     // ─── Initialize ───────────────────────────────
     checkHealth();
     fetchSamples();
+    initSplitSlider();
   </script>
 </body>
 </html>
