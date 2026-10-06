@@ -26,37 +26,46 @@ GemmaLens is a multimodal AI Quality Assurance engineer. Instead of hunting for 
 * **Frontend:** Vanilla JS, HTML5, Tailwind CSS
 * **Parsing:** Marked.js (Markdown rendering)
 
+---
+
 ## 🏁 Quickstart (Local Setup)
 
-**1. Clone the repository**
+### 1. Clone the repository
 ```bash
 git clone https://github.com/aTHaRVaVENJIX/gemmalens-hacktoberfest.git
 cd gemmalens-hacktoberfest
 ```
 
-**2. Configure Environment & Install Dependencies**
+### 2. Set up the Backend
 ```bash
-cp backend/.env.example backend/.env
-pip install -r backend/requirements.txt
+cd backend
+pip install -r requirements.txt
 ```
-*Add your `GEMINI_API_KEY` to `backend/.env`.*
 
-**3. Run the Backend & Frontend**
+### 3. Configure Environment Variables
+Create a `.env` file in the `backend/` directory and add your API key from Google AI Studio:
+```env
+GEMINI_API_KEY=your_google_ai_studio_api_key_here
+```
+
+### 4. Run the FastAPI Server
 ```bash
-# Start FastAPI backend
-uvicorn backend.main:app --reload --port 8000
-
-# Serve frontend
-python -m http.server 3000 --directory frontend
+uvicorn main:app --reload --port 8000
 ```
-Open **[http://localhost:3000](http://localhost:3000)** in your browser.
+
+### 5. Launch the Frontend
+Open `frontend/index.html` in any modern web browser or serve it locally:
+```bash
+cd ../frontend
+python -m http.server 3000
+```
+Navigate to `http://localhost:3000`.
 
 ---
 
-## 🧪 Built-in Judge Evaluation Suite
-Judges can evaluate the triage agent immediately with **zero setup**:
-1. Click any of the **Quick Test Cases** buttons on the dashboard:
-   - **Case 01 — Flexbox Collision**: Missing `min-width: 0` causes badge and title overlap.
-   - **Case 02 — Modal Z-Index Clip**: CSS `transform` traps a `z-index: 9999` dialog behind the sidebar.
-   - **Case 03 — Mobile 100vw**: `100vw` introduces unwanted horizontal scrollbars on 375px screens.
-2. Click **"Execute Visual Triage"** to watch the model diagnose the screen defect and generate syntax-highlighted CSS fixes with red/green diff annotations.
+## 🧪 The Judge Test Suite
+To evaluate the model's accuracy, the application features a built-in Judge Test Suite. Click any of the Quick Test Cases in the UI to instantly load deterministic UI failure modes (Flex Overlap, Modal Z-Clip, or Mobile 100vw Overflow) and watch Gemma 4 synthesize the correct patch.
+
+---
+
+Developed by Atharva for Hacktoberfest Nashik 2026. License: MIT.
