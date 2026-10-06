@@ -1,80 +1,62 @@
-# 🔍 Gemma 4 Visual Defect Triage Agent
-### Hacktoberfest Track 1: *"The Bug That Only Exists on Screen"*
+# 👁️ GemmaLens
 
-![Gemma 4 Vision QA Dashboard Preview](docs/dashboard_preview.jpg)
-
-An AI-powered visual QA triage agent built with **FastAPI**, **Gemma 4** (`gemma-4-31b-it` / `gemma-4-26b-a4b-it`) via the **Google GenAI SDK**, and a dark-mode **Tailwind CSS** dashboard. It diagnoses frontend layout defects that unit tests miss and synthesizes surgical CSS/HTML patches.
+**Automated Visual Defect Triage powered by Gemma 4**  
+*Built for Hacktoberfest KBTCOE 2026 — Track 1: Best Use of Gemma 4*
 
 ---
 
-## 🌟 Why This Exists (Track 1 Challenge)
+## 🚀 The Problem: "The Bug That Only Exists on Screen"
+Frontend developers waste hours trying to reproduce visual UI bugs based on vague user reports (e.g., *"The avatar looks squished on my phone"*). Without clear console errors, debugging CSS flexbox collisions, broken z-index stacking contexts, and mobile viewport blowouts is a tedious game of guess-and-check.
 
-Traditional automated testing suites (Jest, Cypress DOM assertions, Playwright unit tests) check DOM presence and element attributes, but:
-1. **They cannot perceive spatial collisions** caused by default flexbox shrinking behavior.
-2. **They do not compute GPU compositor stacking contexts** that trap high `z-index` modals behind lower `z-index` sidebars.
-3. **They miss horizontal viewport blowouts** caused by `100vw` ignoring scrollbar metrics on mobile screens.
+## 💡 The Solution
+GemmaLens is a multimodal AI Quality Assurance engineer. Instead of hunting for the CSS failure, developers simply upload a screenshot of the broken UI. GemmaLens uses Google's `gemma-4-31b-it` model to analyze the spatial layout and DOM geometry, outputting:
+1. **Visual Geometry Analysis:** Identifies overlapping boundaries and clipping.
+2. **Root Cause Diagnosis:** Pinpoints the exact CSS/HTML structural failure.
+3. **Actionable Code Patch:** Generates the precise CSS snippet required to fix the layout.
 
-This agent takes real screen renders and uses **Gemma 4's multimodal spatial vision** paired with an expert CSS layout diagnostic system prompt to inspect bounding boxes, identify the rendering failure, and generate the exact CSS fix.
+## 🖼️ Dashboard Preview
+![GemmaLens Dashboard Preview](docs/dashboard_preview.jpg)
 
----
+## 🎥 Demo Video
+[Insert your YouTube/Vimeo Demo Link Here]
 
-## 🚀 Project Architecture
+## 🛠️ Tech Stack
+* **AI Model:** Google Gemma 4 (`gemma-4-31b-it`) via Gemini API
+* **Backend:** Python, FastAPI, Uvicorn, Google GenAI SDK
+* **Frontend:** Vanilla JS, HTML5, Tailwind CSS
+* **Parsing:** Marked.js (Markdown rendering)
 
+## 🏁 Quickstart (Local Setup)
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/aTHaRVaVENJIX/gemmalens-hacktoberfest.git
+cd gemmalens-hacktoberfest
 ```
-├── backend/
-│   ├── .env.example          # Environment variable template with GEMINI_API_KEY
-│   ├── requirements.txt      # FastAPI, Uvicorn, google-genai, Pillow, etc.
-│   └── main.py               # FastAPI backend with Gemma 4 visual QA prompt & triage endpoint
-├── frontend/
-│   └── index.html            # Dark-mode dashboard (Tailwind, Marked.js, Canvas bug simulators)
-├── tests/
-│   ├── sample_test_notes.md  # Detailed test notes with Before/After specs for judges
-│   ├── case1_flexbox_overlap.html            # Interactive reproduction for Case 1
-│   ├── case2_modal_zindex_clip.html          # Interactive reproduction for Case 2
-│   └── case3_mobile_viewport_overflow.html   # Interactive reproduction for Case 3
-└── README.md
-```
 
----
-
-## 🛠️ Quick Start Guide
-
-### 1. Prerequisites
-- Python 3.10+
-- A Google AI Studio API key with access to Gemma 4
-
-### 2. Configure Environment
+**2. Configure Environment & Install Dependencies**
 ```bash
 cp backend/.env.example backend/.env
-```
-Edit `backend/.env` and insert your Gemini API Key:
-```env
-GEMINI_API_KEY=AIzaSy...
-GEMMA_MODEL=gemma-4-31b-it
-HOST=0.0.0.0
-PORT=8000
-```
-
-### 3. Install Dependencies
-```bash
 pip install -r backend/requirements.txt
 ```
+*Add your `GEMINI_API_KEY` to `backend/.env`.*
 
-### 4. Run the Server
+**3. Run the Backend & Frontend**
 ```bash
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+# Start FastAPI backend
+uvicorn backend.main:app --reload --port 8000
+
+# Serve frontend
+python -m http.server 3000 --directory frontend
 ```
-Open your browser at **[http://localhost:8000](http://localhost:8000)**. The FastAPI server automatically serves the frontend dashboard at `/`!
+Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ---
 
 ## 🧪 Built-in Judge Evaluation Suite
-
 Judges can evaluate the triage agent immediately with **zero setup**:
 1. Click any of the **Quick Test Cases** buttons on the dashboard:
-   - **1. Flex Overlap**: Missing `min-width: 0` causes badge and title collisions.
-   - **2. Modal Z-Clip**: CSS `transform` isolates `z-index: 9999` dialog behind sidebar.
-   - **3. Mobile 100vw**: `100vw` causes unwanted horizontal scrollbars on 375px screens.
-2. The UI instantly synthesizes a high-fidelity visual defect screenshot using HTML5 canvas.
-3. Click **"Execute Visual Triage"** to watch Gemma 4 analyze the image and generate the Markdown triage report.
-4. Open the standalone test cases in `tests/` (`case1_flexbox_overlap.html`, `case2_modal_zindex_clip.html`, `case3_mobile_viewport_overflow.html`) to toggle live between Before (Buggy) and After (Fixed) states!
+   - **Case 01 — Flexbox Collision**: Missing `min-width: 0` causes badge and title overlap.
+   - **Case 02 — Modal Z-Index Clip**: CSS `transform` traps a `z-index: 9999` dialog behind the sidebar.
+   - **Case 03 — Mobile 100vw**: `100vw` introduces unwanted horizontal scrollbars on 375px screens.
+2. Click **"Execute Visual Triage"** to watch the model diagnose the screen defect and generate syntax-highlighted CSS fixes with red/green diff annotations.
