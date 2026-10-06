@@ -5,7 +5,7 @@
 
 ---
 
-[![Live Demo](https://img.shields.io/badge/🌐%20Live%20Demo-Available%20Online-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://7eb90f6930abc1.lhr.life)
+[![Live Demo](https://img.shields.io/badge/🌐%20Live%20Demo-Available%20Online-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://briefs-dragon-aged-sources.trycloudflare.com)
 [![Gemma 4](https://img.shields.io/badge/AI%20Model-Gemma%204%20%2F%20Flash-f5b726?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-e97b77?style=for-the-badge)](LICENSE)
@@ -15,7 +15,7 @@
 ## 🌐 Try It Online Right Now (No Setup Required)
 GemmaLens is deployed and accessible publicly:
 
-👉 **Live Demo:** **[https://7eb90f6930abc1.lhr.life](https://7eb90f6930abc1.lhr.life)**
+👉 **Live Demo:** **[https://briefs-dragon-aged-sources.trycloudflare.com](https://briefs-dragon-aged-sources.trycloudflare.com)**
 
 *Upload any UI bug screenshot from your desktop or phone, describe the symptom, and watch GemmaLens analyze the spatial geometry and output copy-pasteable CSS patches.*
 
@@ -65,7 +65,7 @@ GemmaLens is a multimodal AI Quality Assurance engineer. Instead of hunting thro
 ## 🏁 Setup Instructions
 
 ### Option A: Instant Web Access (Recommended)
-Simply visit **[https://7eb90f6930abc1.lhr.life](https://7eb90f6930abc1.lhr.life)** in any browser.
+Simply visit **[https://briefs-dragon-aged-sources.trycloudflare.com](https://briefs-dragon-aged-sources.trycloudflare.com)** in any browser.
 
 ---
 

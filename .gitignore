@@ -18,4 +18,8 @@ __pycache__/
 
 # OS metadata
 .DS_Store
+
+# Binaries
+cloudflared
+
 Thumbs.db
